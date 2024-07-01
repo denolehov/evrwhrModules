@@ -1,0 +1,16 @@
+{
+  "slug": "evrwhrModules",
+  "name": "evrwhrModules",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "evrwhrModules",
+  "author": "Denis Olehov",
+  "authorEmail": "",
+  "authorUrl": "https://github.com/denolehov",
+  "pluginUrl": "https://github.com/denolehov/evrwhrModules",
+  "manualUrl": "https://github.com/denolehov/evrwhrModules",
+  "sourceUrl": "https://github.com/denolehov/evrwhrModules",
+  "donateUrl": "https://buymeacoffee.com/evrwhr",
+  "changelogUrl": "",
+  "modules": []
+}
