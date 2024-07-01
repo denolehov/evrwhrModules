@@ -12,5 +12,14 @@
   "sourceUrl": "https://github.com/denolehov/evrwhrModules",
   "donateUrl": "https://buymeacoffee.com/evrwhr",
   "changelogUrl": "",
-  "modules": []
+  "modules": [
+    {
+      "slug": "StereoMatrixMixer",
+      "name": "StereoMatrixMixer",
+      "description": "A stereo matrix mixer.",
+      "tags": [
+        "Mixer"
+      ]
+    }
+  ]
 }
