@@ -76,6 +76,22 @@ struct StereoMatrixMixer : Module {
 		OUTPUTS_LEN
 	};
 	enum LightId {
+		ENUMS(LED11_LIGHT, 3),
+		ENUMS(LED21_LIGHT, 3),
+		ENUMS(LED31_LIGHT, 3),
+		ENUMS(LED41_LIGHT, 3),
+		ENUMS(LED12_LIGHT, 3),
+		ENUMS(LED22_LIGHT, 3),
+		ENUMS(LED32_LIGHT, 3),
+		ENUMS(LED42_LIGHT, 3),
+		ENUMS(LED13_LIGHT, 3),
+		ENUMS(LED23_LIGHT, 3),
+		ENUMS(LED33_LIGHT, 3),
+		ENUMS(LED43_LIGHT, 3),
+		ENUMS(LED14_LIGHT, 3),
+		ENUMS(LED24_LIGHT, 3),
+		ENUMS(LED34_LIGHT, 3),
+		ENUMS(LED44_LIGHT, 3),
 		LIGHTS_LEN
 	};
 
@@ -168,6 +184,13 @@ struct StereoMatrixMixer : Module {
 		{MOD14_INPUT, MOD24_INPUT, MOD34_INPUT, MOD44_INPUT},
 	};
 
+	static constexpr float mixLights[4][4] = {
+		{LED11_LIGHT, LED21_LIGHT, LED31_LIGHT, LED41_LIGHT},
+		{LED12_LIGHT, LED22_LIGHT, LED32_LIGHT, LED42_LIGHT},
+		{LED13_LIGHT, LED23_LIGHT, LED33_LIGHT, LED43_LIGHT},
+		{LED14_LIGHT, LED24_LIGHT, LED34_LIGHT, LED44_LIGHT},
+	};
+
 	void process(const ProcessArgs& args) override {
 		float outL[4] = {0.f, 0.f, 0.f, 0.f};
 		float outR[4] = {0.f, 0.f, 0.f, 0.f};
@@ -191,11 +214,33 @@ struct StereoMatrixMixer : Module {
 			float mixL = 0.f;
 			float mixR = 0.f;
 
+			float cumulativeMixL[4] = {0.f, 0.f, 0.f, 0.f};
+			float cumulativeMixR[4] = {0.f, 0.f, 0.f, 0.f};
+
 			for (int j = 0; j < 4; j++)
 			{
 				const float mixVal = getMixValue(j, i);
+
 				mixL += mixVal * inL[j];
 				mixR += mixVal * inR[j];
+
+				cumulativeMixL[j] += mixL;
+				cumulativeMixR[j] += mixR;
+
+				float mixAvg = (cumulativeMixL[j] + cumulativeMixR[j]) / 2.f;
+				float brightness = fabs(mixAvg) / 10.f;
+
+				if (mixAvg > 0.f)
+				{
+					lights[mixLights[j][i] + 1].setBrightness(brightness);
+				} else if (mixAvg < 0.f)
+				{
+					lights[mixLights[j][i] + 0].setBrightness(brightness);
+				} else
+				{
+					lights[mixLights[j][i]].setBrightness(0.f);
+					lights[mixLights[j][i] + 1].setBrightness(0.f);
+				}
 			}
 
 			outL[i] = clamp(mixL, -10.f, 10.f);
@@ -302,6 +347,23 @@ struct StereoMatrixMixerWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(79.932, 120.002)), module, StereoMatrixMixer::OR3_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(94.0, 120.0)), module, StereoMatrixMixer::OL4_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(105.966, 120.0)), module, StereoMatrixMixer::OR4_OUTPUT));
+
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(20.0, 28.0)), module, StereoMatrixMixer::LED11_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(54.0, 28.0)), module, StereoMatrixMixer::LED21_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(88.0, 28.0)), module, StereoMatrixMixer::LED31_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(122.0, 28.0)), module, StereoMatrixMixer::LED41_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(20.0, 54.0)), module, StereoMatrixMixer::LED12_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(54.0, 54.0)), module, StereoMatrixMixer::LED22_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(88.0, 54.0)), module, StereoMatrixMixer::LED32_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(122.0, 54.0)), module, StereoMatrixMixer::LED42_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(20.0, 80.0)), module, StereoMatrixMixer::LED13_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(54.0, 80.0)), module, StereoMatrixMixer::LED23_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(88.0, 80.0)), module, StereoMatrixMixer::LED33_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(122.0, 80.0)), module, StereoMatrixMixer::LED43_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(20.0, 106.0)), module, StereoMatrixMixer::LED14_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(54.0, 106.0)), module, StereoMatrixMixer::LED24_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(88.0, 106.0)), module, StereoMatrixMixer::LED34_LIGHT));
+		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(122.0, 106.0)), module, StereoMatrixMixer::LED44_LIGHT));
 	}
 };
 
