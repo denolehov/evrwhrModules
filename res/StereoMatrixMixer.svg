@@ -23,15 +23,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.1607381"
-     inkscape:cx="326.51638"
-     inkscape:cy="228.30301"
-     inkscape:window-width="1512"
-     inkscape:window-height="859"
-     inkscape:window-x="512"
-     inkscape:window-y="1478"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="layer3" />
+     inkscape:zoom="2.5305201"
+     inkscape:cx="236.51264"
+     inkscape:cy="231.17777"
+     inkscape:window-width="2560"
+     inkscape:window-height="1387"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
   <defs
      id="defs1" />
   <rect
@@ -106,57 +106,57 @@
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle15"
-       cx="15.932251"
-       cy="120.00239"
+       cx="27.499998"
+       cy="118"
        inkscape:label="OL1"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle16"
-       cx="27.932255"
-       cy="120.00239"
+       cx="39.5"
+       cy="118"
        inkscape:label="OR1"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle17"
-       cx="41.986591"
-       cy="120.00239"
+       cx="61.588135"
+       cy="118.00238"
        inkscape:label="OL2"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle18"
-       cx="53.986416"
-       cy="119.99996"
+       cx="73.587944"
+       cy="117.99995"
        inkscape:label="OR2"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle19"
-       cx="67.932251"
-       cy="120.00239"
+       cx="95.499977"
+       cy="117.99995"
        inkscape:label="OL3"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle20"
-       cx="79.932251"
-       cy="120.00239"
+       cx="107.50001"
+       cy="117.99995"
        inkscape:label="OR3"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle21"
-       cx="94"
-       cy="119.99996"
+       cx="132.03392"
+       cy="117.99995"
        inkscape:label="OL4"
        r="4" />
     <circle
        style="fill:#0000ff;stroke-width:0.423336"
        id="circle22"
-       cx="105.96611"
-       cy="119.99996"
+       cx="144"
+       cy="117.99995"
        inkscape:label="OR4"
        r="4" />
     <circle

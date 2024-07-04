@@ -219,16 +219,19 @@ struct StereoMatrixMixer : Module {
 
 			for (int j = 0; j < 4; j++)
 			{
-				const float mixVal = getMixValue(j, i);
+				const float mixFactor = getMixFactor(j, i);
 
-				mixL += mixVal * inL[j];
-				mixR += mixVal * inR[j];
+				mixL += mixFactor * inL[j];
+				mixR += mixFactor * inR[j];
 
 				cumulativeMixL[j] += mixL;
 				cumulativeMixR[j] += mixR;
 
 				float mixAvg = (cumulativeMixL[j] + cumulativeMixR[j]) / 2.f;
-				float brightness = fabs(mixAvg) / 10.f;
+
+				// In real life, the lights are dim, so offset it a bit so they're more visible.
+				float brightness = fabs(mixAvg) / 10.f + 0.15f;
+				brightness = clamp(brightness, 0.f, 1.f);
 
 				if (mixAvg > 0.f)
 				{
@@ -257,12 +260,9 @@ struct StereoMatrixMixer : Module {
 		outputs[OR4_OUTPUT].setVoltage(outR[3]);
 	}
 
-	float getMixValue(const int row, const int col)
+	float getMixFactor(const int row, const int col)
 	{
 		const float mixFactor = params[mixParams[row][col]].getValue();
-		if (mixFactor == 0.f)
-			return 0.f;
-
 		const float modValue = inputs[modInputs[row][col]].isConnected() ? inputs[modInputs[row][col]].getVoltage() / 5.f : 0.f;
 		const float attFactor = params[attParams[row][col]].getValue();
 
@@ -339,14 +339,14 @@ struct StereoMatrixMixerWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(112.0, 104.0)), module, StereoMatrixMixer::MOD34_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(146.0, 104.0)), module, StereoMatrixMixer::MOD44_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.932, 120.002)), module, StereoMatrixMixer::OL1_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(27.932, 120.002)), module, StereoMatrixMixer::OR1_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(41.987, 120.002)), module, StereoMatrixMixer::OL2_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(53.986, 120.0)), module, StereoMatrixMixer::OR2_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(67.932, 120.002)), module, StereoMatrixMixer::OL3_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(79.932, 120.002)), module, StereoMatrixMixer::OR3_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(94.0, 120.0)), module, StereoMatrixMixer::OL4_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(105.966, 120.0)), module, StereoMatrixMixer::OR4_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(27.5, 118.0)), module, StereoMatrixMixer::OL1_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(39.5, 118.0)), module, StereoMatrixMixer::OR1_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(61.588, 118.002)), module, StereoMatrixMixer::OL2_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(73.588, 118.0)), module, StereoMatrixMixer::OR2_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(95.5, 118.0)), module, StereoMatrixMixer::OL3_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(107.5, 118.0)), module, StereoMatrixMixer::OR3_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(132.034, 118.0)), module, StereoMatrixMixer::OL4_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(144.0, 118.0)), module, StereoMatrixMixer::OR4_OUTPUT));
 
 		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(20.0, 28.0)), module, StereoMatrixMixer::LED11_LIGHT));
 		addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(mm2px(Vec(54.0, 28.0)), module, StereoMatrixMixer::LED21_LIGHT));
