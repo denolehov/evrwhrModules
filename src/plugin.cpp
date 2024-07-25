@@ -8,4 +8,5 @@ void init(Plugin* p) {
 	pluginInstance = p;
 	p->addModel(modelStereoMatrixMixer);
 	p->addModel(modelSeed);
+	p->addModel(modelRandomWalkLFO);
 }

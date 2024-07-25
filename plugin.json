@@ -26,6 +26,12 @@
       "name": "Seed",
       "description": "",
       "tags": []
+    },
+    {
+      "slug": "RandomWalkLFO",
+      "name": "RandomWalkLFO",
+      "description": "",
+      "tags": []
     }
   ]
 }
