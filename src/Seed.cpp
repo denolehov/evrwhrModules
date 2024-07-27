@@ -70,6 +70,22 @@ struct Seed : Module {
 		configInput(RESET_IN_INPUT, "Reset");
 	}
 
+	void onRandomize() override
+	{
+		for (auto & buttonState : buttonStates)
+		{
+			// get the random value and determine the button state
+			const float randomValue = random::uniform();
+			if (randomValue < 0.33)
+				buttonState = ButtonState::A;
+			else if (randomValue < 0.66)
+				buttonState = ButtonState::B;
+			else
+				buttonState = ButtonState::C;
+		}
+		reseedNoise(); // TODO: This should be just a simple reseed + sending a message to expanders.
+	}
+
 	void onExpanderChange(const ExpanderChangeEvent& e) override
 	{
 		if (e.side == 0)
@@ -80,7 +96,7 @@ struct Seed : Module {
 			return;
 
 		DEBUG("CONNECTED RANDOM LFO!");
-	};
+	}
 
 	static bool isExpanderCompatible(const Module* module)
 	{
