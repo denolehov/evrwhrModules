@@ -70,6 +70,23 @@ struct Seed : Module {
 		configInput(RESET_IN_INPUT, "Reset");
 	}
 
+	void onExpanderChange(const ExpanderChangeEvent& e) override
+	{
+		if (e.side == 0)
+			return;
+
+		const Module* rightModule = getRightExpander().module;
+		if (!isExpanderCompatible(rightModule))
+			return;
+
+		DEBUG("CONNECTED RANDOM LFO!");
+	};
+
+	static bool isExpanderCompatible(const Module* module)
+	{
+		return module && module->model == modelRandomWalkLFO;
+	}
+
 	void process(const ProcessArgs& args) override {
 		if (clockTrigger.process(getInput(CLOCK_IN_INPUT).getVoltage()))
 		{
