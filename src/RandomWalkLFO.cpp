@@ -76,7 +76,7 @@ struct RandomWalkLFO : Module {
 
 	static bool isExpanderCompatible(const Module* module) // FIXME: This is a duplicate of the same function in Seed.cpp
 	{
-		return module && module->model == modelRandomWalkLFO;
+		return module && (module->model == modelRandomWalkLFO || module->model == modelTrigger);
 	}
 
 	void propagateToDaisyChained(const Event ev)
@@ -138,11 +138,6 @@ struct RandomWalkLFOWidget : ModuleWidget {
 	RandomWalkLFOWidget(RandomWalkLFO* module) {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/RandomWalkLFO.svg")));
-
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.62, 19.5)), module, RandomWalkLFO::RATE_PARAM));
 		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(7.62, 40.5)), module, RandomWalkLFO::VARIANT_PARAM));

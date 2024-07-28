@@ -32,6 +32,12 @@
       "name": "RandomWalkLFO",
       "description": "",
       "tags": []
+    },
+    {
+      "slug": "Trigger",
+      "name": "Trigger",
+      "description": "",
+      "tags": []
     }
   ]
 }

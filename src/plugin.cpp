@@ -9,4 +9,5 @@ void init(Plugin* p) {
 	p->addModel(modelStereoMatrixMixer);
 	p->addModel(modelSeed);
 	p->addModel(modelRandomWalkLFO);
+	p->addModel(modelTrigger);
 }
