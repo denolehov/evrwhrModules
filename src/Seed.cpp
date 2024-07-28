@@ -1,10 +1,7 @@
 #include "plugin.hpp"
-#include "OpenSimplexNoise/OpenSimplexNoise.h"
+#include "event.h"
 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
+constexpr int LEFT_EXPANDER_SIDE = 0;
 
 enum class ButtonState{ A, B, C };
 
@@ -53,10 +50,11 @@ struct Seed : Module {
 
 	dsp::BooleanTrigger pushTriggers[8];
 	dsp::SchmittTrigger clockTrigger;
-	int currentSeed;
-	std::unique_ptr<OpenSimplexNoise::Noise> noise;
+	dsp::SchmittTrigger resetTrigger;
 
-	Seed() : currentSeed(0), noise(make_unique<OpenSimplexNoise::Noise>(currentSeed)) {
+	int currentSeed;
+
+	Seed() : currentSeed(0) {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configButton(FIRST_PARAM, "A");
 		configButton(SECOND_PARAM,  "B");
@@ -74,7 +72,6 @@ struct Seed : Module {
 	{
 		for (auto & buttonState : buttonStates)
 		{
-			// get the random value and determine the button state
 			const float randomValue = random::uniform();
 			if (randomValue < 0.33)
 				buttonState = ButtonState::A;
@@ -83,19 +80,12 @@ struct Seed : Module {
 			else
 				buttonState = ButtonState::C;
 		}
-		reseedNoise(); // TODO: This should be just a simple reseed + sending a message to expanders.
-	}
+		updateSeed();
 
-	void onExpanderChange(const ExpanderChangeEvent& e) override
-	{
-		if (e.side == 0)
-			return;
-
-		const Module* rightModule = getRightExpander().module;
-		if (!isExpanderCompatible(rightModule))
-			return;
-
-		DEBUG("CONNECTED RANDOM LFO!");
+		Event ev;
+		ev.seed = currentSeed;
+		ev.seedChanged = true;
+		propagateEvent(ev);
 	}
 
 	static bool isExpanderCompatible(const Module* module)
@@ -103,28 +93,52 @@ struct Seed : Module {
 		return module && module->model == modelRandomWalkLFO;
 	}
 
-	void process(const ProcessArgs& args) override {
-		if (clockTrigger.process(getInput(CLOCK_IN_INPUT).getVoltage()))
-		{
-			double const z = noise->eval(734234.13, 7342.31, 0.0);
-			DEBUG("Noise value: %f", rescale(z, -1.0, 1.0, -5.0, 5.0));
-		}
+	static bool shouldSendEvent(const Event ev)
+	{
+		return ev.clock || ev.globalReset || ev.seedChanged;
+	}
 
+	void propagateEvent(const Event ev)
+	{
+		if (!shouldSendEvent(ev))
+			return;
+
+		Module* rightModule = getRightExpander().module;
+		if (!isExpanderCompatible(rightModule))
+			return;
+
+		auto* producerEvent = reinterpret_cast<Event*>(rightModule->getLeftExpander().producerMessage);
+
+		*producerEvent = ev;
+
+		rightModule->getLeftExpander().requestMessageFlip();
+
+		DEBUG("Sent a message to right expander");
+	}
+
+	void process(const ProcessArgs& args) override {
+		Event ev;
+
+		if (clockTrigger.process(getInput(CLOCK_IN_INPUT).getVoltage()))
+			ev.clock = true;
+
+		if (resetTrigger.process(getInput(RESET_IN_INPUT).getVoltage()))
+			ev.globalReset = true;
+
+		bool seedChanged = false;
 		for (int i = 0; i < PARAMS_LEN; i++) {
 			const bool pushed = pushTriggers[i].process(getParam(i).getValue());
 			if (pushed) {
 				buttonStates[i] = ++buttonStates[i];
-				reseedNoise();
+				updateSeed();
+				seedChanged = true;
 			}
 			litTheButton(buttonStates[i], i * 3, args.sampleTime);
 		}
-	}
+		ev.seed = currentSeed;
+		ev.seedChanged = seedChanged;
 
-	void reseedNoise()
-	{
-		updateSeed();
-		noise = make_unique<OpenSimplexNoise::Noise>(currentSeed);
-		DEBUG("NEW SEED: %d", currentSeed);
+		propagateEvent(ev);
 	}
 
 	void updateSeed()
