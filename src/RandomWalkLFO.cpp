@@ -139,17 +139,17 @@ struct RandomWalkLFOWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/RandomWalkLFO.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.62, 11.5)), module, RandomWalkLFO::RATE_PARAM));
-		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(7.62, 25.927)), module, RandomWalkLFO::VARIANT_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.62, 19.5)), module, RandomWalkLFO::RATE_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(7.62, 40.5)), module, RandomWalkLFO::VARIANT_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 114.5)), module, RandomWalkLFO::RESET_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 108.5)), module, RandomWalkLFO::RESET_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 101.5)), module, RandomWalkLFO::CV_OUTPUT));
+		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 89.5)), module, RandomWalkLFO::CV_OUTPUT));
 	}
 };
 
