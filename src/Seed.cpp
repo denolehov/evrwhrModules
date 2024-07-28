@@ -27,8 +27,7 @@ struct Seed : Module {
 		PARAMS_LEN
 	};
 	enum InputId {
-		CLOCK_IN_INPUT,
-		RESET_IN_INPUT,
+		RESET_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -64,8 +63,7 @@ struct Seed : Module {
 		configButton(SIXTH_PARAM, "F");
 		configButton(SEVENTH_PARAM, "G");
 		configButton(EIGHTH_PARAM,  "H");
-		configInput(CLOCK_IN_INPUT, "Clock (24ppqn)");
-		configInput(RESET_IN_INPUT, "Reset");
+		configInput(RESET_INPUT, "Reset");
 	}
 
 	void onRandomize() override
@@ -117,10 +115,7 @@ struct Seed : Module {
 	void process(const ProcessArgs& args) override {
 		Event ev;
 
-		if (clockTrigger.process(getInput(CLOCK_IN_INPUT).getVoltage()))
-			ev.clock = true;
-
-		if (resetTrigger.process(getInput(RESET_IN_INPUT).getVoltage()))
+		if (resetTrigger.process(getInput(RESET_INPUT).getVoltage()))
 			ev.globalReset = true;
 
 		bool seedChanged = false;
@@ -170,7 +165,29 @@ struct Seed : Module {
 				break;
 		}
 	}
-};
+
+	json_t* dataToJson() override
+	{
+		json_t* rootJ = json_object();
+		const char* seeds[] = {"seed_a", "seed_b", "seed_c", "seed_d", "seed_e", "seed_f", "seed_g", "seed_h"};
+
+		for (int i = 0; i < 8; ++i)
+		{
+			json_object_set_new(rootJ, seeds[i], json_integer(static_cast<int>(buttonStates[i])));
+		}
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override
+	{
+		const char* seeds[] = {"seed_a", "seed_b", "seed_c", "seed_d", "seed_e", "seed_f", "seed_g", "seed_h"};
+
+		for (int i = 0; i < 8; ++i)
+		{
+			buttonStates[i] = static_cast<ButtonState>(json_integer_value(json_object_get(rootJ, seeds[i])));
+		}
+	}};
 
 
 struct SeedWidget : ModuleWidget {
@@ -178,22 +195,21 @@ struct SeedWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Seed.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 11.5)), module, Seed::FIRST_PARAM, Seed::FIRST_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 22.5)), module, Seed::SECOND_PARAM, Seed::SECOND_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 33.5)), module, Seed::THIRD_PARAM, Seed::THIRD_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 44.5)), module, Seed::FOURTH_PARAM, Seed::FOURTH_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 55.5)), module, Seed::FIFTH_PARAM, Seed::FIFTH_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 66.5)), module, Seed::SIXTH_PARAM, Seed::SIXTH_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 77.5)), module, Seed::SEVENTH_PARAM, Seed::SEVENTH_LIGHT));
-		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 88.5)), module, Seed::EIGHTH_PARAM, Seed::EIGHTH_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 18.5)), module, Seed::FIRST_PARAM, Seed::FIRST_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 29.5)), module, Seed::SECOND_PARAM, Seed::SECOND_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 40.5)), module, Seed::THIRD_PARAM, Seed::THIRD_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 51.5)), module, Seed::FOURTH_PARAM, Seed::FOURTH_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 62.5)), module, Seed::FIFTH_PARAM, Seed::FIFTH_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 73.5)), module, Seed::SIXTH_PARAM, Seed::SIXTH_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 84.5)), module, Seed::SEVENTH_PARAM, Seed::SEVENTH_LIGHT));
+		addParam(createLightParamCentered<LightButton<VCVBezel, VCVBezelLight<RedGreenBlueLight>>>(mm2px(Vec(7.62, 95.5)), module, Seed::EIGHTH_PARAM, Seed::EIGHTH_LIGHT));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 101.5)), module, Seed::CLOCK_IN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 114.5)), module, Seed::RESET_IN_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 108.5)), module, Seed::RESET_INPUT));
 	}
 };
 
