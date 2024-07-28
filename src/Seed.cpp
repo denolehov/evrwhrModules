@@ -112,8 +112,6 @@ struct Seed : Module {
 		*producerEvent = ev;
 
 		rightModule->getLeftExpander().requestMessageFlip();
-
-		DEBUG("Sent a message to right expander");
 	}
 
 	void process(const ProcessArgs& args) override {

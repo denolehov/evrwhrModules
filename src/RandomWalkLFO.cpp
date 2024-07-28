@@ -9,8 +9,8 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 
 struct RandomWalkLFO : Module {
 	enum ParamId {
-		LENGTH_PARAM,
 		RATE_PARAM,
+		VARIANT_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
@@ -25,10 +25,20 @@ struct RandomWalkLFO : Module {
 		LIGHTS_LEN
 	};
 
+	dsp::SchmittTrigger resetTrigger;
+	dsp::PulseGenerator pulse;
+	dsp::Timer timer;
+	std::unique_ptr<OpenSimplexNoise::Noise> noise;
+
+	Event messages[2] = {};
+
+	double phase = 0.0;
+	float currentVariant = 0.0f;
+
 	RandomWalkLFO() : noise(make_unique<OpenSimplexNoise::Noise>(0)) {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(LENGTH_PARAM, 1.f, 17.f, 17.f, "Length");
 		configParam(RATE_PARAM, 0.f, 1.f, 0.5f, "Rate");
+		configParam(VARIANT_PARAM, 0.f, 32.f, 0.f, "Variant");
 		configInput(RESET_INPUT, "Reset");
 		configOutput(CV_OUTPUT, "CV");
 
@@ -36,20 +46,33 @@ struct RandomWalkLFO : Module {
 		getLeftExpander().consumerMessage = &messages[1];
 	}
 
-	double phase = 0.0;
-	/**
-	 * Represents the number of 24ppqn clock ticks since the last reset.
-	 * Resets to 0 when the length is changed or the reset input is triggered.
-	 */
-	int clock = 0;
+	void onReset(const ResetEvent& e) override
+	{
+		Module::onReset(e);
+		doReset();
+	}
 
-	float length = 17.0f;
+	void process(const ProcessArgs& args) override {
+		handleConsumedMessage();
 
-	std::unique_ptr<OpenSimplexNoise::Noise> noise;
+		const float resetIn = getInput(RESET_INPUT).getVoltage();
+		if (resetTrigger.process(resetIn, 0.1f, 2.f))
+			doReset();
 
-	dsp::SchmittTrigger resetTrigger;
+		handleVariantUpdate();
 
-	Event messages[2] = {};
+		float outCV = noise->eval(1, phase + currentVariant);
+		outCV = rescale(outCV, -1.0f, 1.0f, -5.0f, 5.0f);
+		getOutput(CV_OUTPUT).setVoltage(outCV);
+
+		const float speedParam = getParam(RATE_PARAM).getValue();
+		constexpr float minRate = 0.001f;
+		const float maxRate = dsp::FREQ_A4;
+		const float speed = minRate * std::pow(maxRate / minRate, speedParam);
+		const float phaseIncrement = speed * args.sampleTime;
+		phase += phaseIncrement;
+	}
+
 
 	static bool isExpanderCompatible(const Module* module) // FIXME: This is a duplicate of the same function in Seed.cpp
 	{
@@ -60,10 +83,7 @@ struct RandomWalkLFO : Module {
 	{
 		Module* rightModule = getRightExpander().module;
 		if (!isExpanderCompatible(rightModule))
-		{
-			DEBUG("Right module is not compatible with the LFO expander!");
 			return;
-		}
 
 		auto* producerEvent = reinterpret_cast<Event*>(rightModule->getLeftExpander().producerMessage);
 
@@ -71,8 +91,6 @@ struct RandomWalkLFO : Module {
 		producerEvent->processed = false;
 
 		rightModule->getLeftExpander().requestMessageFlip();
-
-		DEBUG("Sent a message to right expander from LFO!");
 	}
 
 	void handleConsumedMessage()
@@ -81,60 +99,37 @@ struct RandomWalkLFO : Module {
 		if (!ev || ev->processed)
 			return;
 
-		DEBUG("Received message from left expander: seed: %d, clock: %d", ev->seed, ev->clock);
-
 		if (ev->seedChanged || ev->globalReset)
 		{
 			reseedNoise(ev->seed);
-			reset();
+			doReset();
 		}
 
-		if (ev->clock)
-			clock++;
-
 		ev->processed = true;
+
 		propagateToDaisyChained(*ev);
 	}
 
-	void reset()
+	void doReset()
 	{
-		phase = 0.0f;
-		clock = 0;
+		if (phase == 0.0) return;
+
+		phase = 0.0;
 	}
 
-	void reseedNoise(int seed)
+	void reseedNoise(int seed) { noise = make_unique<OpenSimplexNoise::Noise>(seed); }
+
+	void handleVariantUpdate()
 	{
-		noise = make_unique<OpenSimplexNoise::Noise>(seed);
-	}
+		const float variant = getParam(VARIANT_PARAM).getValue();
+		if (variant == currentVariant)
+			return;
 
-	void process(const ProcessArgs& args) override {
-		handleConsumedMessage();
-
-		if (resetTrigger.process(getInput(RESET_INPUT).getVoltage())) {
-			reset();
-		}
-
-		const float newLength = getParam(LENGTH_PARAM).getValue();
-		if (length != newLength)
-		{
-			DEBUG("Length changed from %f to %f", length, newLength);
-			length = newLength;
-		}
-
-		// the length is in bars, meaning that when the clock reached 96 * length, it should reset
-		if (clock >= 96 * length)
-			reset();
-
-		float outCV = noise->eval(1, phase);
-		outCV = rescale(outCV, -1.0f, 1.0f, -5.0f, 5.0f);
-		getOutput(CV_OUTPUT).setVoltage(outCV);
-
-		const float speedParam = getParam(RATE_PARAM).getValue();
-		constexpr float minRate = 0.001f;
-		const float maxRate = dsp::FREQ_A4;
-		const float speed = minRate * std::pow(maxRate / minRate, speedParam);
-		const float phaseIncrement = speed * args.sampleTime;
-		phase += phaseIncrement;
+		// Variant must be updated once per local or global reset
+		// otherwise the output is thrashed while the knob is twisted
+		// and that might be *VERY* poor sounding
+		if (phase == 0.0f)
+			currentVariant = variant;
 	}
 };
 
@@ -149,8 +144,8 @@ struct RandomWalkLFOWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(7.62, 46.201)), module, RandomWalkLFO::LENGTH_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.62, 64.25)), module, RandomWalkLFO::RATE_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.62, 11.5)), module, RandomWalkLFO::RATE_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(7.62, 25.927)), module, RandomWalkLFO::VARIANT_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 114.5)), module, RandomWalkLFO::RESET_INPUT));
 
