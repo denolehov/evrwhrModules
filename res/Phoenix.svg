@@ -23,15 +23,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="21.237307"
-     inkscape:cx="29.900213"
-     inkscape:cy="195.74045"
+     inkscape:zoom="1.8771305"
+     inkscape:cx="-85.236482"
+     inkscape:cy="265.29855"
      inkscape:window-width="2560"
      inkscape:window-height="1387"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer2" />
+     inkscape:current-layer="layer1" />
   <defs
      id="defs1" />
   <g
@@ -59,112 +59,112 @@
        id="circle14"
        cx="22.25"
        cy="97.25"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_HIT"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle5"
        cx="22.25"
        cy="113.75"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_OUT"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle2"
        cx="22.25"
        cy="17.749695"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_FALL_PARAM"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle8"
        cx="8.25"
        cy="17.749695"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_RISE_PARAM"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle10"
        cx="8.5101328"
        cy="64.235413"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_INVERT"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle11"
        cx="8.25"
        cy="80.75"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_RISEN"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle3"
        cx="22.25"
        cy="80.75"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_FALLEN"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
        id="circle17"
        cx="15.24"
        cy="49.037384"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_AM"
        r="2.5" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
        id="circle18"
        cx="8.25"
        cy="26.009117"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_RISE_CV"
        r="2.5" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle19"
        cx="8.25"
        cy="34.268539"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_RISE_INPUT"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
        id="circle20"
        cx="22.25"
        cy="26.009117"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_FALL_CV"
        r="2.5" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle21"
        cx="22.25"
        cy="34.268539"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_FALL_INPUT"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
        id="circle25"
        cx="23.988928"
        cy="49.037384"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_WM"
        r="2.5" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle26"
        cx="22.25"
        cy="64.25"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_LIN_EXP"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
        id="circle23"
        cx="8.25"
        cy="113.75"
-       inkscape:label="BG_TRIGGER"
+       inkscape:label="BG_AUX"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
        id="circle24"
        cx="6.4910717"
        cy="49.037384"
-       inkscape:label="BG_INPUT"
+       inkscape:label="BG_OM"
        r="2.5" />
     <text
        xml:space="preserve"
@@ -184,7 +184,7 @@
        x="19.966824"
        y="105.48685"
        id="text1"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_HIT"><tspan
          sodipodi:role="line"
          id="tspan1"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -196,7 +196,7 @@
        x="19.640858"
        y="122.00095"
        id="text6"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_OUT"><tspan
          sodipodi:role="line"
          id="tspan5"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -208,7 +208,7 @@
        x="19.446125"
        y="42.019039"
        id="text7"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_FALL"><tspan
          sodipodi:role="line"
          id="tspan6"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -220,7 +220,7 @@
        x="5.3487563"
        y="42.028915"
        id="text8"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_RISE"><tspan
          sodipodi:role="line"
          id="tspan8"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -232,7 +232,7 @@
        x="3.805491"
        y="72.463791"
        id="text10"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_INVERT"><tspan
          sodipodi:role="line"
          id="tspan10"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -244,7 +244,7 @@
        x="4.4527011"
        y="89.000954"
        id="text11"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_RISEN"><tspan
          sodipodi:role="line"
          id="tspan11"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -256,7 +256,7 @@
        x="17.892492"
        y="88.991074"
        id="text4"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       inkscape:label="TEXT_FALLEN"><tspan
          sodipodi:role="line"
          id="tspan3"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -265,10 +265,22 @@
     <text
        xml:space="preserve"
        style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+       x="5.4783192"
+       y="121.9939"
+       id="text23"
+       inkscape:label="TEXT_AUX"><tspan
+         sodipodi:role="line"
+         id="tspan23"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+         x="5.4783192"
+         y="121.9939">AUX</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
        x="21.403894"
        y="55.049171"
        id="text9"
-       inkscape:label="TEXT_INPUT"><tspan
+       inkscape:label="TEXT_WM"><tspan
          sodipodi:role="line"
          id="tspan7"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -277,15 +289,39 @@
     <text
        xml:space="preserve"
        style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-       x="5.4783192"
-       y="121.9939"
-       id="text23"
-       inkscape:label="TEXT_TRIGGER"><tspan
+       x="4.2558746"
+       y="55.04776"
+       id="text24"
+       inkscape:label="TEXT_OM"><tspan
          sodipodi:role="line"
-         id="tspan23"
+         id="tspan24"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-         x="5.4783192"
-         y="121.9939">AUX</tspan></text>
+         x="4.2558746"
+         y="55.04776">OM</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+       x="13.083822"
+       y="55.04776"
+       id="text25"
+       inkscape:label="TEXT_AM"><tspan
+         sodipodi:role="line"
+         id="tspan25"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+         x="13.083822"
+         y="55.04776">AM</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+       x="16.841213"
+       y="72.444038"
+       id="text26"
+       inkscape:label="TEXT_LIN_EXP"><tspan
+         sodipodi:role="line"
+         id="tspan26"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+         x="16.841213"
+         y="72.444038">LIN/EXP</tspan></text>
     <text
        xml:space="preserve"
        style="font-weight:bold;font-size:4.93889px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
@@ -298,42 +334,6 @@
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93889px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
          x="4.8876343"
          y="9.4766731">PHOENIX</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-       x="4.2558746"
-       y="55.04776"
-       id="text24"
-       inkscape:label="TEXT_INPUT"><tspan
-         sodipodi:role="line"
-         id="tspan24"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-         x="4.2558746"
-         y="55.04776">OM</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-       x="13.083822"
-       y="55.04776"
-       id="text25"
-       inkscape:label="TEXT_INPUT"><tspan
-         sodipodi:role="line"
-         id="tspan25"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-         x="13.083822"
-         y="55.04776">AM</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-weight:bold;font-size:2.82222px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-       x="16.841213"
-       y="72.444038"
-       id="text26"
-       inkscape:label="TEXT_TRIGGER"><tspan
-         sodipodi:role="line"
-         id="tspan26"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-         x="16.841213"
-         y="72.444038">LIN/EXP</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
@@ -341,53 +341,123 @@
      inkscape:label="components"
      style="display:none">
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
        id="circle9"
-       cx="7.6199999"
-       cy="15.25"
-       inkscape:label="SIGNAL"
+       cx="8.25"
+       cy="17.749695"
+       inkscape:label="RISE"
        r="4" />
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
        id="circle6"
-       cx="7.6199999"
-       cy="31.920116"
-       inkscape:label="TRIGGER"
+       cx="22.25"
+       cy="17.749695"
+       inkscape:label="FALL"
        r="4" />
     <circle
        style="display:inline;fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
        id="circle7"
-       cx="7.6199999"
-       cy="110.75"
-       inkscape:label="OUT"
+       cx="8.25"
+       cy="113.75"
+       inkscape:label="AUX"
        r="4" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
+       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle12"
-       cx="7.6199999"
-       cy="48.25"
-       inkscape:label="FALL"
+       cx="8.25"
+       cy="34.268539"
+       inkscape:label="RISE"
        r="4" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
+       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle13"
-       cx="7.6199999"
-       cy="64.75"
-       inkscape:label="RECOVER"
+       cx="8.5101328"
+       cy="64.235413"
+       inkscape:label="INVERT"
        r="4" />
     <circle
        style="fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
        id="circle15"
-       cx="7.6199999"
-       cy="80.409081"
-       inkscape:label="EOC"
+       cx="8.25"
+       cy="80.75"
+       inkscape:label="RISEN"
        r="4" />
     <circle
        style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle16"
-       cx="7.6199999"
-       cy="94.25"
-       inkscape:label="INVERT"
+       cx="8.25"
+       cy="97.25"
+       inkscape:label="MAIN"
+       r="4" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       id="circle27"
+       cx="8.25"
+       cy="26.009117"
+       inkscape:label="RISE_CV"
+       r="2" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       id="circle28"
+       cx="22.25"
+       cy="26.009117"
+       inkscape:label="FALL_CV"
+       r="2" />
+    <circle
+       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       id="circle29"
+       cx="22.25"
+       cy="34.273479"
+       inkscape:label="FALL"
+       r="4" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       id="circle30"
+       cx="6.4910717"
+       cy="49.037384"
+       inkscape:label="OM"
+       r="2" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       id="circle31"
+       cx="15.24"
+       cy="49.037384"
+       inkscape:label="AM"
+       r="2" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       id="circle32"
+       cx="23.988928"
+       cy="49.037384"
+       inkscape:label="WM"
+       r="2" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
+       id="circle33"
+       cx="22.25"
+       cy="64.25"
+       inkscape:label="LIN_EXP"
+       r="4" />
+    <circle
+       style="fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
+       id="circle34"
+       cx="22.25"
+       cy="80.75"
+       inkscape:label="FALLEN"
+       r="4" />
+    <circle
+       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       id="circle35"
+       cx="22.25"
+       cy="97.25"
+       inkscape:label="HIT"
+       r="4" />
+    <circle
+       style="display:inline;fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
+       id="circle36"
+       cx="22.25"
+       cy="113.75"
+       inkscape:label="MAIN"
        r="4" />
   </g>
 </svg>
