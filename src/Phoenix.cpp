@@ -10,7 +10,8 @@ struct BaselineTracker {
 
 	enum State { IDLE, RECOVERING, RECOVERED } state = IDLE;
 
-	enum Mode { NORMAL, INVERTED } mode = NORMAL;
+	enum RunningMode { NORMAL, INVERTED } mode = NORMAL;
+	enum WeakeningMode { ALWAYS, UNTIL_RECOVERED } weakeningMode = UNTIL_RECOVERED;
 
 	float process(const float delta) {
 		if (current == target) {
@@ -39,13 +40,17 @@ struct BaselineTracker {
 	}
 
 	void weaken(const float strength) {
+		if (weakeningMode == UNTIL_RECOVERED && state == RECOVERING) {
+			return;
+		}
+
 		current = mode == NORMAL ? current - strength : current + strength;
 		current = clamp(current, 0.f, 1.f);
 		startValue = current;
 		progress = 0.f;
 	}
 
-	Mode invert() {
+	RunningMode invert() {
 		mode = mode == NORMAL ? INVERTED : NORMAL;
 		target = mode == NORMAL ? 1.f : 0.f;
 		startValue = current;
