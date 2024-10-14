@@ -8,8 +8,13 @@ struct BaselineTracker {
 	float MIN_RECOVERY_SPEED = 0.00001f;
 	float recoverySpeed = MIN_RECOVERY_SPEED;
 
+	enum State { IDLE, RECOVERING, RECOVERED };
+
+	State state = IDLE;
+
 	float process(const float delta) {
 		if (current == target) {
+			state = IDLE;
 			return current;
 		}
 
@@ -23,6 +28,8 @@ struct BaselineTracker {
 			progress = 0.f;
 			startValue = current;
 		}
+
+		state = current == target ? RECOVERED : RECOVERING;
 
 		return current;
 	}
@@ -38,8 +45,16 @@ struct BaselineTracker {
 		progress = 0.f;
 	}
 
+	float getTarget() const {
+		return target;
+	}
+
 	void setTarget(const float target) {
 		this->target = target;
+	}
+
+	State getState() const {
+		return state;
 	}
 
 	void setRecoverySpeed(float speed) {
@@ -81,6 +96,7 @@ struct Phoenix : Module {
 	BaselineTracker baseline;
 
 	dsp::SchmittTrigger trigger;
+	dsp::PulseGenerator eoc;
 
 	// TODO: SIGNAL -> MAIN
 	// TODO: OUT -> MAIN
@@ -97,10 +113,8 @@ struct Phoenix : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		float recoverSpeed = getParam(RECOVER_PARAM).getValue();
-		baseline.setRecoverySpeed(recoverSpeed);
+		baseline.setRecoverySpeed(getParam(RECOVER_PARAM).getValue());
 
-		// attenuate it according to the triggers
 		if (trigger.process(getInput(TRIGGER_INPUT).getVoltage(), 0.1f, 2.f)) {
 			// TODO: Add a "slow" mode where the baseline is nudged by an random amount (up to a user-defined limit).
 			baseline.weaken(getParam(FALL_PARAM).getValue());
@@ -108,10 +122,9 @@ struct Phoenix : Module {
 
 		baseline.process(args.sampleTime);
 
-		// get the input voltage
 		// TODO: Polyphony.
 		// TODO: Configurable input/output ranges (e.g. -5V to 5V, 0V to 10V, etc.)
-		float signal = getInput(SIGNAL_INPUT).getVoltage();
+		const float signal = getInput(SIGNAL_INPUT).getVoltage();
 
 		// TODO: Attenuation mode.
 		// This is for attenuation mode.
@@ -121,9 +134,11 @@ struct Phoenix : Module {
 		const float y_max = rescale(baseline.getCurrent(), 0.f, 1.f, -10.f, 10.f);
 		const float out = rescale(signal, -10.f, 10.f, -10.f, y_max);
 
-		// output it
+		if (baseline.getState() == BaselineTracker::RECOVERED) {
+			eoc.trigger();
+		}
+		getOutput(EOC_OUTPUT).setVoltage(eoc.process(args.sampleTime) ? 10.f : 0.f);
 		getOutput(OUT_OUTPUT).setVoltage(out);
-		getOutput(EOC_OUTPUT).setVoltage(baseline.getCurrent()); // TODO: This is just for debugging.
 	}
 };
 
