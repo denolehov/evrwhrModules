@@ -5,12 +5,12 @@ struct BaselineTracker {
 	float current = 1.f; float target = 1.f; float startValue = 1.f;
 	float progress = 0.f;
 
-	float MIN_RECOVERY_SPEED = 0.00001f;
+	float MIN_RECOVERY_SPEED = 0.01f;
 	float recoverySpeed = MIN_RECOVERY_SPEED;
 
-	enum State { IDLE, RECOVERING, RECOVERED };
+	enum State { IDLE, RECOVERING, RECOVERED } state = IDLE;
 
-	State state = IDLE;
+	enum Mode { NORMAL, INVERTED } mode = NORMAL;
 
 	float process(const float delta) {
 		if (current == target) {
@@ -39,18 +39,18 @@ struct BaselineTracker {
 	}
 
 	void weaken(const float strength) {
-		current -= strength;
+		current = mode == NORMAL ? current - strength : current + strength;
 		current = clamp(current, 0.f, 1.f);
 		startValue = current;
 		progress = 0.f;
 	}
 
-	float getTarget() const {
-		return target;
-	}
-
-	void setTarget(const float target) {
-		this->target = target;
+	Mode invert() {
+		mode = mode == NORMAL ? INVERTED : NORMAL;
+		target = mode == NORMAL ? 1.f : 0.f;
+		startValue = current;
+		progress = 0.f;
+		return mode;
 	}
 
 	State getState() const {
@@ -95,7 +95,8 @@ struct Phoenix : Module {
 	// TODO: Save / Load these
 	BaselineTracker baseline;
 
-	dsp::SchmittTrigger trigger;
+	dsp::SchmittTrigger weakenTrigger;
+	dsp::SchmittTrigger invertTrigger;
 	dsp::PulseGenerator eoc;
 
 	// TODO: SIGNAL -> MAIN
@@ -104,7 +105,7 @@ struct Phoenix : Module {
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configParam(FALL_PARAM, 0.f, 1.f, .1f, "");
-		configParam(RECOVER_PARAM, 0.00001f, 20.f, 0.00001f, "Recover speed", " s");
+		configParam(RECOVER_PARAM, 0.01f, 300.f, 0.01f, "Recover speed", " s");
 		configInput(SIGNAL_INPUT, "");
 		configInput(TRIGGER_INPUT, "");
 		configInput(INVERT_INPUT, "");
@@ -115,7 +116,11 @@ struct Phoenix : Module {
 	void process(const ProcessArgs& args) override {
 		baseline.setRecoverySpeed(getParam(RECOVER_PARAM).getValue());
 
-		if (trigger.process(getInput(TRIGGER_INPUT).getVoltage(), 0.1f, 2.f)) {
+		if (invertTrigger.process(getInput(INVERT_INPUT).getVoltage())) {
+			baseline.invert();
+		}
+
+		if (weakenTrigger.process(getInput(TRIGGER_INPUT).getVoltage(), 0.1f, 2.f)) {
 			// TODO: Add a "slow" mode where the baseline is nudged by an random amount (up to a user-defined limit).
 			baseline.weaken(getParam(FALL_PARAM).getValue());
 		}
@@ -128,7 +133,7 @@ struct Phoenix : Module {
 
 		// TODO: Attenuation mode.
 		// This is for attenuation mode.
-		// float out = signal * baseline;
+		// const float out = signal * baseline.getCurrent();
 
 		// This is for "nudge" (offset) mode.
 		const float y_max = rescale(baseline.getCurrent(), 0.f, 1.f, -10.f, 10.f);
