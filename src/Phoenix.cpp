@@ -48,6 +48,7 @@ struct Phoenix : Module {
 			baseline = clamp(baseline, 0.f, 1.f);
 		}
 
+		// TODO: Attenuation mode.
 		// This is for attenuation mode.
 		// float out = signal * baseline;
 
