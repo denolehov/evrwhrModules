@@ -76,24 +76,37 @@ struct BaselineTracker {
 };
 
 
-struct Phoenix : Module {
+struct Phoenix final : Module {
 	enum ParamId {
+		RISE_PARAM,
 		FALL_PARAM,
-		RECOVER_PARAM,
+		RISE_CV_PARAM,
+		FALL_CV_PARAM,
+		OM_PARAM,
+		AM_PARAM,
+		WM_PARAM,
+		LIN_EXP_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
-		SIGNAL_INPUT,
-		TRIGGER_INPUT,
+		RISE_INPUT,
+		FALL_INPUT,
 		INVERT_INPUT,
+		MAIN_INPUT,
+		HIT_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
-		EOC_OUTPUT,
-		OUT_OUTPUT,
+		RISEN_OUTPUT,
+		FALLEN_OUTPUT,
+		AUX_OUTPUT,
+		MAIN_OUTPUT,
 		OUTPUTS_LEN
 	};
 	enum LightId {
+		ENUMS(OM_LIGHT, 3),
+		ENUMS(AM_LIGHT, 3),
+		ENUMS(WM_LIGHT, 3),
 		LIGHTS_LEN
 	};
 
@@ -109,23 +122,33 @@ struct Phoenix : Module {
 
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(FALL_PARAM, 0.f, 1.f, .1f, "");
-		configParam(RECOVER_PARAM, 0.01f, 300.f, 0.01f, "Recover speed", " s");
-		configInput(SIGNAL_INPUT, "");
-		configInput(TRIGGER_INPUT, "");
-		configInput(INVERT_INPUT, "");
-		configOutput(EOC_OUTPUT, "");
-		configOutput(OUT_OUTPUT, "");
+		configParam(RISE_PARAM, 0.1f, 13.f, 0.1f, "Rise", " s");
+		configParam(FALL_PARAM, 0.f, 1.f, 0.1f, "Hit strength");
+		configParam(RISE_CV_PARAM, 0.f, 1.f, 0.f, "Rise CV");
+		configParam(FALL_CV_PARAM, 0.f, 1.f, 0.f, "Fall CV");
+		configButton(OM_PARAM, "Output range"); // TODO: Rename these.
+		configButton(AM_PARAM, "Attenuation mode");
+		configButton(WM_PARAM, "Hit behavior");
+		configParam(LIN_EXP_PARAM, 0.f, 1.f, 0.f, "Linear / Exponential rise");
+		configInput(RISE_INPUT, "Rise CV (-5V/5V)");
+		configInput(FALL_INPUT, "Fall CV (-5V/5V)");
+		configInput(INVERT_INPUT, "Invert trigger");
+		configInput(MAIN_INPUT, "Main");
+		configInput(HIT_INPUT, "Hit");
+		configOutput(RISEN_OUTPUT, "Risen");
+		configOutput(FALLEN_OUTPUT, "Fallen");
+		configOutput(AUX_OUTPUT, "AUX");
+		configOutput(MAIN_OUTPUT, "Main");
 	}
 
 	void process(const ProcessArgs& args) override {
-		baseline.setRecoverySpeed(getParam(RECOVER_PARAM).getValue());
+		baseline.setRecoverySpeed(getParam(RISE_PARAM).getValue());
 
 		if (invertTrigger.process(getInput(INVERT_INPUT).getVoltage())) {
 			baseline.invert();
 		}
 
-		if (weakenTrigger.process(getInput(TRIGGER_INPUT).getVoltage(), 0.1f, 2.f)) {
+		if (weakenTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 2.f)) {
 			// TODO: Add a "slow" mode where the baseline is nudged by an random amount (up to a user-defined limit).
 			baseline.weaken(getParam(FALL_PARAM).getValue());
 		}
@@ -134,7 +157,7 @@ struct Phoenix : Module {
 
 		// TODO: Polyphony.
 		// TODO: Configurable input/output ranges (e.g. -5V to 5V, 0V to 10V, etc.)
-		const float signal = getInput(SIGNAL_INPUT).getVoltage();
+		const float signal = getInput(MAIN_INPUT).getVoltage();
 
 		// TODO: Attenuation mode.
 		// This is for attenuation mode.
@@ -147,26 +170,36 @@ struct Phoenix : Module {
 		if (baseline.getState() == BaselineTracker::RECOVERED) {
 			eoc.trigger();
 		}
-		getOutput(EOC_OUTPUT).setVoltage(eoc.process(args.sampleTime) ? 10.f : 0.f);
-		getOutput(OUT_OUTPUT).setVoltage(out);
+		getOutput(FALLEN_OUTPUT).setVoltage(eoc.process(args.sampleTime) ? 10.f : 0.f);
+		getOutput(MAIN_OUTPUT).setVoltage(out);
 	}
 };
 
 
-struct PhoenixWidget : ModuleWidget {
-	PhoenixWidget(Phoenix* module) {
+struct PhoenixWidget final : ModuleWidget {
+	explicit PhoenixWidget(Phoenix* module) {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Phoenix.svg")));
 
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(7.62, 48.25)), module, Phoenix::FALL_PARAM));
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(7.62, 64.75)), module, Phoenix::RECOVER_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(8.25, 17.75)), module, Phoenix::RISE_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(22.25, 17.75)), module, Phoenix::FALL_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(8.25, 26.009)), module, Phoenix::RISE_CV_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(22.25, 26.009)), module, Phoenix::FALL_CV_PARAM));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(6.491, 49.037)), module, Phoenix::OM_PARAM, Phoenix::OM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(15.24, 49.037)), module, Phoenix::AM_PARAM, Phoenix::AM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(23.989, 49.037)), module, Phoenix::WM_PARAM, Phoenix::WM_LIGHT));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(22.25, 64.25)), module, Phoenix::LIN_EXP_PARAM));
 
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 15.25)), module, Phoenix::SIGNAL_INPUT));
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 31.92)), module, Phoenix::TRIGGER_INPUT));
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 94.25)), module, Phoenix::INVERT_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 34.269)), module, Phoenix::RISE_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(22.25, 34.273)), module, Phoenix::FALL_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.51, 64.235)), module, Phoenix::INVERT_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 97.25)), module, Phoenix::MAIN_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(22.25, 97.25)), module, Phoenix::HIT_INPUT));
 
-		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 80.409)), module, Phoenix::EOC_OUTPUT));
-		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(7.62, 110.75)), module, Phoenix::OUT_OUTPUT));
+		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 80.75)), module, Phoenix::RISEN_OUTPUT));
+		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(22.25, 80.75)), module, Phoenix::FALLEN_OUTPUT));
+		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 113.75)), module, Phoenix::AUX_OUTPUT));
+		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(22.25, 113.75)), module, Phoenix::MAIN_OUTPUT));
 	}
 };
 
