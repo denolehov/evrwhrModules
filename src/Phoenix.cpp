@@ -153,6 +153,7 @@ struct Phoenix final : Module {
 	float FALL_PARAM_MAX = 1.f;
 
 	enum AttenuationMode { ATTENUATION, NUDGE } attenuationMode = NUDGE;
+	enum VoltageRange { UNI_10V, BI_10V, UNI_5V, BI_5V, RANGES_LEN } operatingRange = BI_10V;
 
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -160,9 +161,9 @@ struct Phoenix final : Module {
 		configParam(FALL_PARAM, FALL_PARAM_MIN, FALL_PARAM_MAX, 0.1f, "Hit strength");
 		configParam(RISE_CV_PARAM, -1.f, 1.f, 0.f, "Rise CV");
 		configParam(FALL_CV_PARAM, -1.f, 1.f, 0.f, "Fall CV");
-		configButton(OM_PARAM, "Output range"); // TODO: Rename these.
-		configButton(AM_PARAM, "Attenuation mode");
-		configButton(WM_PARAM, "Weakening mode");
+		configButton(OM_PARAM, "Output mode (UNI 10V = green, BI 10V = blue, UNI 5V = orange, BI 5V = cyan)");
+		configButton(AM_PARAM, "Attenuation mode (ATT = green, NUDGE = blue)");
+		configButton(WM_PARAM, "Weakening mode (ALWAYS = cyan, WAIT UNTIL RECOVERED = orange)");
 		configParam(LIN_EXP_PARAM, 0.f, 1.f, 0.f, "Linear / Exponential rise");
 		configInput(RISE_INPUT, "Rise CV (-5V/5V)");
 		configInput(FALL_INPUT, "Fall CV (-5V/5V)");
@@ -187,6 +188,10 @@ struct Phoenix final : Module {
 			baseline.toggleWeaknessMode();
 		}
 
+		if (omTrigger.process(getParam(OM_PARAM).getValue())) {
+			operatingRange = static_cast<VoltageRange>((operatingRange + 1) % RANGES_LEN);
+		}
+
 		const float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
 		baseline.setRecoverySpeed(recoverySpeed);
 
@@ -201,18 +206,19 @@ struct Phoenix final : Module {
 
 		baseline.process(args.sampleTime);
 
+		Range range = getOperatingRange();
+
 		// TODO: Polyphony.
-		// TODO: Configurable input/output ranges (e.g. -5V to 5V, 0V to 10V, etc.)
-		const float signal = getInput(MAIN_INPUT).getVoltage();
+		const float signal = clamp(getInput(MAIN_INPUT).getVoltage(), range.min, range.max);
 
 		float out = 0.f;
 		switch (attenuationMode) {
 			case ATTENUATION:
-				out = signal * baseline.getCurrent();
+				out = clamp(signal * baseline.getCurrent(), range.min, range.max);
 				break;
 			case NUDGE:
-				const float y_max = rescale(baseline.getCurrent(), 0.f, 1.f, -10.f, 10.f);
-				out = rescale(signal, -10.f, 10.f, -10.f, y_max);
+				const float new_max = rescale(baseline.getCurrent(), 0.f, 1.f, range.min, range.max);
+				out = rescale(signal, range.min, range.max, range.min, new_max);
 				break;
 		}
 
@@ -232,6 +238,25 @@ struct Phoenix final : Module {
 
 		setLight(AM_LIGHT, 1.f, attenuationMode == ATTENUATION ? GREEN : BLUE, args.sampleTime);
 		setLight(WM_LIGHT, 1.f, baseline.getWeaknessMode() == BaselineTracker::ALWAYS ? CYAN : ORANGE, args.sampleTime);
+
+		Color omColor;
+		switch (operatingRange) {
+			case UNI_10V:
+				omColor = GREEN;
+				break;
+			case BI_10V:
+				omColor = BLUE;
+				break;
+			case UNI_5V:
+				omColor = ORANGE;
+				break;
+			case BI_5V:
+			default:
+				omColor = CYAN;
+				break;
+		}
+
+		setLight(OM_LIGHT, 1.f, omColor, args.sampleTime);
 	}
 
 	enum Color { GREEN, BLUE, ORANGE, CYAN };
@@ -278,6 +303,26 @@ struct Phoenix final : Module {
 		in = rescale(in, -5.f, 5.f, paramMin, paramMax);
 
 		return clamp(param + in * att, paramMin, paramMax);
+	}
+
+	struct Range {
+		float min;
+		float max;
+	};
+
+	Range getOperatingRange() const {
+		switch (operatingRange) {
+		case BI_10V:
+			return {-10.f, 10.f};
+		case BI_5V:
+			return {-5.f, 5.f};
+		case UNI_10V:
+			return {0.f, 10.f};
+		case UNI_5V:
+			return {0.f, 5.f};
+		default:
+			return {0.f, 0.f};
+		}
 	}
 };
 
