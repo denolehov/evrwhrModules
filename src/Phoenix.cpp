@@ -5,6 +5,8 @@ struct BaselineTracker {
 	float current = 1.f; float target = 1.f; float startValue = 1.f;
 	float progress = 0.f;
 
+	float linExpRatio = 0.f;
+
 	float MIN_RECOVERY_SPEED = 0.01f;
 	float recoverySpeed = MIN_RECOVERY_SPEED;
 
@@ -20,9 +22,13 @@ struct BaselineTracker {
 		}
 
 		progress += delta;
-		const float p = clamp(progress / recoverySpeed, 0.f, 1.f);
+		float p = clamp(progress / recoverySpeed, 0.f, 1.f);
 
-		current = crossfade(startValue, target, easeInAndOut(p));
+		const float linP = p;
+		const float expP = easeInAndOut(p);
+		p = crossfade(linP, expP, linExpRatio);
+
+		current = crossfade(startValue, target, p);
 
 		if (p >= 1.f) {
 			current = target;
@@ -75,6 +81,10 @@ struct BaselineTracker {
 		}
 
 		return (p - 1) * (2 * p - 2) * (2 * p - 2) + 1;
+	}
+
+	void setLinExpRatio(const float val) {
+		linExpRatio = val;
 	}
 };
 
@@ -152,6 +162,8 @@ struct Phoenix final : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		baseline.setLinExpRatio(getParam(LIN_EXP_PARAM).getValue());
+
 		const float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
 		baseline.setRecoverySpeed(recoverySpeed);
 
