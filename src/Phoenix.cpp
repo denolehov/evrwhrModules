@@ -131,6 +131,10 @@ struct Phoenix final : Module {
 	dsp::PulseGenerator risen;
 	dsp::PulseGenerator fallen;
 
+	dsp::BooleanTrigger omTrigger;
+	dsp::BooleanTrigger amTrigger;
+	dsp::BooleanTrigger wmTrigger;
+
 	// TODO: SIGNAL -> MAIN
 	// TODO: OUT -> MAIN
 
@@ -139,6 +143,8 @@ struct Phoenix final : Module {
 
 	float FALL_PARAM_MIN = 0.f;
 	float FALL_PARAM_MAX = 1.f;
+
+	enum AttenuationMode { ATTENUATION, NUDGE } attenuationMode = NUDGE;
 
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -164,6 +170,11 @@ struct Phoenix final : Module {
 	void process(const ProcessArgs& args) override {
 		baseline.setLinExpRatio(getParam(LIN_EXP_PARAM).getValue());
 
+		// Handle attenuation mode.
+		if (amTrigger.process(getParam(AM_PARAM).getValue())) {
+			attenuationMode = attenuationMode == ATTENUATION ? NUDGE : ATTENUATION;
+		}
+
 		const float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
 		baseline.setRecoverySpeed(recoverySpeed);
 
@@ -182,13 +193,16 @@ struct Phoenix final : Module {
 		// TODO: Configurable input/output ranges (e.g. -5V to 5V, 0V to 10V, etc.)
 		const float signal = getInput(MAIN_INPUT).getVoltage();
 
-		// TODO: Attenuation mode.
-		// This is for attenuation mode.
-		// const float out = signal * baseline.getCurrent();
-
-		// This is for "nudge" (offset) mode.
-		const float y_max = rescale(baseline.getCurrent(), 0.f, 1.f, -10.f, 10.f);
-		const float out = rescale(signal, -10.f, 10.f, -10.f, y_max);
+		float out = 0.f;
+		switch (attenuationMode) {
+			case ATTENUATION:
+				out = signal * baseline.getCurrent();
+				break;
+			case NUDGE:
+				const float y_max = rescale(baseline.getCurrent(), 0.f, 1.f, -10.f, 10.f);
+				out = rescale(signal, -10.f, 10.f, -10.f, y_max);
+				break;
+		}
 
 		if (baseline.getState() == BaselineTracker::RECOVERED) {
 			risen.trigger();
@@ -203,6 +217,31 @@ struct Phoenix final : Module {
 		const float aux = rescale(baseline.getCurrent(), 0.f, 1.f, -5.f, 5.f);
 		getOutput(AUX_OUTPUT).setVoltage(aux);
 		getOutput(MAIN_OUTPUT).setVoltage(out);
+
+		setLight(AM_LIGHT, 1.f, attenuationMode == ATTENUATION ? GREEN : BLUE, args.sampleTime);
+	}
+
+	enum Color { GREEN, BLUE };
+
+	void setLight(const LightId lightId, const float brightness, const Color color, float delta) {
+		float r = 0.f, g = 0.f, b = 0.f;
+
+		switch (color) {
+		case GREEN:
+			r = 0.f;
+			g = brightness;
+			b = 0.f;
+			break;
+		case BLUE:
+			r = 0.f;
+			g = 0.f;
+			b = brightness;
+			break;
+		}
+
+		getLight(lightId + 0).setBrightnessSmooth(r, delta);
+		getLight(lightId + 1).setBrightnessSmooth(g, delta);
+		getLight(lightId + 2).setBrightnessSmooth(b, delta);
 	}
 
 	float getAttenuverted(const ParamId paramId, const InputId inputId, const ParamId attParamId, const float paramMin, const float paramMax) {
