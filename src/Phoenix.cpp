@@ -120,11 +120,14 @@ struct Phoenix final : Module {
 	// TODO: SIGNAL -> MAIN
 	// TODO: OUT -> MAIN
 
+	float RISE_PARAM_MIN = 0.f;
+	float RISE_PARAM_MAX = 13.f;
+
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(RISE_PARAM, 0.1f, 13.f, 0.1f, "Rise", " s");
+		configParam(RISE_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX, 0.1f, "Rise", " s");
 		configParam(FALL_PARAM, 0.f, 1.f, 0.1f, "Hit strength");
-		configParam(RISE_CV_PARAM, 0.f, 1.f, 0.f, "Rise CV");
+		configParam(RISE_CV_PARAM, -1.f, 1.f, 0.f, "Rise CV");
 		configParam(FALL_CV_PARAM, 0.f, 1.f, 0.f, "Fall CV");
 		configButton(OM_PARAM, "Output range"); // TODO: Rename these.
 		configButton(AM_PARAM, "Attenuation mode");
@@ -141,15 +144,28 @@ struct Phoenix final : Module {
 		configOutput(MAIN_OUTPUT, "Main");
 	}
 
+	float getAttenuverted(const ParamId paramId, const InputId inputId, const ParamId attParamId, const float paramMin, const float paramMax) {
+		const float param = getParam(paramId).getValue();
+		if (!getInput(inputId).isConnected()) {
+			return param;
+		}
+
+		const float att = getParam(attParamId).getValue();
+		float in = getInput(inputId).getVoltage();
+		in = rescale(in, -5.f, 5.f, paramMin, paramMax);
+
+		return clamp(param + in * att, paramMin, paramMax);
+	}
+
 	void process(const ProcessArgs& args) override {
-		baseline.setRecoverySpeed(getParam(RISE_PARAM).getValue());
+		float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
+		baseline.setRecoverySpeed(recoverySpeed);
 
 		if (invertTrigger.process(getInput(INVERT_INPUT).getVoltage())) {
 			baseline.invert();
 		}
 
 		if (weakenTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 2.f)) {
-			// TODO: Add a "slow" mode where the baseline is nudged by an random amount (up to a user-defined limit).
 			baseline.weaken(getParam(FALL_PARAM).getValue());
 		}
 
