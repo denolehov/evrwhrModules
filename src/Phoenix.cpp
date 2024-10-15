@@ -151,19 +151,6 @@ struct Phoenix final : Module {
 		configOutput(MAIN_OUTPUT, "Main");
 	}
 
-	float getAttenuverted(const ParamId paramId, const InputId inputId, const ParamId attParamId, const float paramMin, const float paramMax) {
-		const float param = getParam(paramId).getValue();
-		if (!getInput(inputId).isConnected()) {
-			return param;
-		}
-
-		const float att = getParam(attParamId).getValue();
-		float in = getInput(inputId).getVoltage();
-		in = rescale(in, -5.f, 5.f, paramMin, paramMax);
-
-		return clamp(param + in * att, paramMin, paramMax);
-	}
-
 	void process(const ProcessArgs& args) override {
 		const float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
 		baseline.setRecoverySpeed(recoverySpeed);
@@ -204,6 +191,19 @@ struct Phoenix final : Module {
 		const float aux = rescale(baseline.getCurrent(), 0.f, 1.f, -5.f, 5.f);
 		getOutput(AUX_OUTPUT).setVoltage(aux);
 		getOutput(MAIN_OUTPUT).setVoltage(out);
+	}
+
+	float getAttenuverted(const ParamId paramId, const InputId inputId, const ParamId attParamId, const float paramMin, const float paramMax) {
+		const float param = getParam(paramId).getValue();
+		if (!getInput(inputId).isConnected()) {
+			return param;
+		}
+
+		const float att = getParam(attParamId).getValue();
+		float in = getInput(inputId).getVoltage();
+		in = rescale(in, -5.f, 5.f, paramMin, paramMax);
+
+		return clamp(param + in * att, paramMin, paramMax);
 	}
 };
 
