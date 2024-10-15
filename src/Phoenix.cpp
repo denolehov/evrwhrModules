@@ -39,15 +39,18 @@ struct BaselineTracker {
 		return current;
 	}
 
-	void weaken(const float strength) {
+	bool weaken(const float strength) {
 		if (weakeningMode == UNTIL_RECOVERED && state == RECOVERING) {
-			return;
+			return false;
 		}
 
 		current = mode == NORMAL ? current - strength : current + strength;
 		current = clamp(current, 0.f, 1.f);
 		startValue = current;
 		progress = 0.f;
+
+		const bool hasFallen = mode == NORMAL ? current == 0.f : current == 1.f;
+		return state != RECOVERING && hasFallen;
 	}
 
 	RunningMode invert() {
@@ -116,6 +119,7 @@ struct Phoenix final : Module {
 	dsp::SchmittTrigger weakenTrigger;
 	dsp::SchmittTrigger invertTrigger;
 	dsp::PulseGenerator risen;
+	dsp::PulseGenerator fallen;
 
 	// TODO: SIGNAL -> MAIN
 	// TODO: OUT -> MAIN
@@ -168,8 +172,9 @@ struct Phoenix final : Module {
 			baseline.invert();
 		}
 
+		bool hasFallen = false;
 		if (weakenTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 2.f)) {
-			baseline.weaken(getAttenuverted(FALL_PARAM, FALL_INPUT, FALL_CV_PARAM, FALL_PARAM_MIN, FALL_PARAM_MAX));
+			hasFallen = baseline.weaken(getAttenuverted(FALL_PARAM, FALL_INPUT, FALL_CV_PARAM, FALL_PARAM_MIN, FALL_PARAM_MAX));
 		}
 
 		baseline.process(args.sampleTime);
@@ -190,6 +195,12 @@ struct Phoenix final : Module {
 			risen.trigger();
 		}
 		getOutput(RISEN_OUTPUT).setVoltage(risen.process(args.sampleTime) ? 10.f : 0.f);
+
+		if (hasFallen) {
+			fallen.trigger();
+		}
+		getOutput(FALLEN_OUTPUT).setVoltage(fallen.process(args.sampleTime) ? 10.f : 0.f);
+
 		getOutput(MAIN_OUTPUT).setVoltage(out);
 	}
 };
