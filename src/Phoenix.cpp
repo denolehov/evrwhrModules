@@ -153,7 +153,7 @@ struct Phoenix final : Module {
 	float FALL_PARAM_MAX = 1.f;
 
 	enum AttenuationMode { ATTENUATION, NUDGE } attenuationMode = NUDGE;
-	enum VoltageRange { UNI_10V, BI_10V, UNI_5V, BI_5V, RANGES_LEN } operatingRange = BI_10V;
+	enum VoltageRange { BI_10V, UNI_10V, BI_5V, UNI_5V, RANGES_LEN } operatingRange = BI_10V;
 
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -161,7 +161,7 @@ struct Phoenix final : Module {
 		configParam(FALL_PARAM, FALL_PARAM_MIN, FALL_PARAM_MAX, 0.1f, "Hit strength");
 		configParam(RISE_CV_PARAM, -1.f, 1.f, 0.f, "Rise CV");
 		configParam(FALL_CV_PARAM, -1.f, 1.f, 0.f, "Fall CV");
-		configButton(OM_PARAM, "Output mode (UNI 10V = green, BI 10V = blue, UNI 5V = orange, BI 5V = cyan)");
+		configButton(OM_PARAM, "Output mode (BI 10V = green, UNI 10V = blue, BI 5V = orange, UNI 5V = cyan)");
 		configButton(AM_PARAM, "Attenuation mode (ATT = green, NUDGE = blue)");
 		configButton(WM_PARAM, "Weakening mode (ALWAYS = cyan, WAIT UNTIL RECOVERED = orange)");
 		configParam(LIN_EXP_PARAM, 0.f, 1.f, 0.f, "Linear / Exponential rise");
