@@ -55,8 +55,7 @@ struct BaselineTracker {
 		startValue = current;
 		progress = 0.f;
 
-		const bool hasFallen = mode == NORMAL ? current == 0.f : current == 1.f;
-		return state != RECOVERING && hasFallen;
+		return mode == NORMAL ? current == 0.f : current == 1.f;
 	}
 
 	RunningMode invert() {
@@ -85,6 +84,15 @@ struct BaselineTracker {
 
 	void setLinExpRatio(const float val) {
 		linExpRatio = val;
+	}
+
+
+	WeakeningMode getWeaknessMode() const {
+		return weakeningMode;
+	}
+
+	void toggleWeaknessMode() {
+		weakeningMode = weakeningMode == ALWAYS ? UNTIL_RECOVERED : ALWAYS;
 	}
 };
 
@@ -154,7 +162,7 @@ struct Phoenix final : Module {
 		configParam(FALL_CV_PARAM, -1.f, 1.f, 0.f, "Fall CV");
 		configButton(OM_PARAM, "Output range"); // TODO: Rename these.
 		configButton(AM_PARAM, "Attenuation mode");
-		configButton(WM_PARAM, "Hit behavior");
+		configButton(WM_PARAM, "Weakening mode");
 		configParam(LIN_EXP_PARAM, 0.f, 1.f, 0.f, "Linear / Exponential rise");
 		configInput(RISE_INPUT, "Rise CV (-5V/5V)");
 		configInput(FALL_INPUT, "Fall CV (-5V/5V)");
@@ -173,6 +181,10 @@ struct Phoenix final : Module {
 		// Handle attenuation mode.
 		if (amTrigger.process(getParam(AM_PARAM).getValue())) {
 			attenuationMode = attenuationMode == ATTENUATION ? NUDGE : ATTENUATION;
+		}
+
+		if (wmTrigger.process(getParam(WM_PARAM).getValue())) {
+			baseline.toggleWeaknessMode();
 		}
 
 		const float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
@@ -219,9 +231,10 @@ struct Phoenix final : Module {
 		getOutput(MAIN_OUTPUT).setVoltage(out);
 
 		setLight(AM_LIGHT, 1.f, attenuationMode == ATTENUATION ? GREEN : BLUE, args.sampleTime);
+		setLight(WM_LIGHT, 1.f, baseline.getWeaknessMode() == BaselineTracker::ALWAYS ? CYAN : ORANGE, args.sampleTime);
 	}
 
-	enum Color { GREEN, BLUE };
+	enum Color { GREEN, BLUE, ORANGE, CYAN };
 
 	void setLight(const LightId lightId, const float brightness, const Color color, float delta) {
 		float r = 0.f, g = 0.f, b = 0.f;
@@ -235,6 +248,16 @@ struct Phoenix final : Module {
 		case BLUE:
 			r = 0.f;
 			g = 0.f;
+			b = brightness;
+			break;
+		case ORANGE:
+			r = brightness;
+			g = brightness * 0.5f;
+			b = 0.f;
+			break;
+		case CYAN:
+			r = 0.f;
+			g = brightness;
 			b = brightness;
 			break;
 		}
