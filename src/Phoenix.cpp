@@ -11,7 +11,7 @@ struct BaselineTracker {
 	enum State { IDLE, RECOVERING, RECOVERED } state = IDLE;
 
 	enum RunningMode { NORMAL, INVERTED } mode = NORMAL;
-	enum WeakeningMode { ALWAYS, UNTIL_RECOVERED } weakeningMode = UNTIL_RECOVERED;
+	enum WeakeningMode { ALWAYS, UNTIL_RECOVERED } weakeningMode = ALWAYS;
 
 	float process(const float delta) {
 		if (current == target) {
@@ -115,7 +115,7 @@ struct Phoenix final : Module {
 
 	dsp::SchmittTrigger weakenTrigger;
 	dsp::SchmittTrigger invertTrigger;
-	dsp::PulseGenerator eoc;
+	dsp::PulseGenerator risen;
 
 	// TODO: SIGNAL -> MAIN
 	// TODO: OUT -> MAIN
@@ -123,12 +123,15 @@ struct Phoenix final : Module {
 	float RISE_PARAM_MIN = 0.f;
 	float RISE_PARAM_MAX = 13.f;
 
+	float FALL_PARAM_MIN = 0.f;
+	float FALL_PARAM_MAX = 1.f;
+
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configParam(RISE_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX, 0.1f, "Rise", " s");
-		configParam(FALL_PARAM, 0.f, 1.f, 0.1f, "Hit strength");
+		configParam(FALL_PARAM, FALL_PARAM_MIN, FALL_PARAM_MAX, 0.1f, "Hit strength");
 		configParam(RISE_CV_PARAM, -1.f, 1.f, 0.f, "Rise CV");
-		configParam(FALL_CV_PARAM, 0.f, 1.f, 0.f, "Fall CV");
+		configParam(FALL_CV_PARAM, -1.f, 1.f, 0.f, "Fall CV");
 		configButton(OM_PARAM, "Output range"); // TODO: Rename these.
 		configButton(AM_PARAM, "Attenuation mode");
 		configButton(WM_PARAM, "Hit behavior");
@@ -158,7 +161,7 @@ struct Phoenix final : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
+		const float recoverySpeed = getAttenuverted(RISE_PARAM, RISE_INPUT, RISE_CV_PARAM, RISE_PARAM_MIN, RISE_PARAM_MAX);
 		baseline.setRecoverySpeed(recoverySpeed);
 
 		if (invertTrigger.process(getInput(INVERT_INPUT).getVoltage())) {
@@ -166,7 +169,7 @@ struct Phoenix final : Module {
 		}
 
 		if (weakenTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 2.f)) {
-			baseline.weaken(getParam(FALL_PARAM).getValue());
+			baseline.weaken(getAttenuverted(FALL_PARAM, FALL_INPUT, FALL_CV_PARAM, FALL_PARAM_MIN, FALL_PARAM_MAX));
 		}
 
 		baseline.process(args.sampleTime);
@@ -184,9 +187,9 @@ struct Phoenix final : Module {
 		const float out = rescale(signal, -10.f, 10.f, -10.f, y_max);
 
 		if (baseline.getState() == BaselineTracker::RECOVERED) {
-			eoc.trigger();
+			risen.trigger();
 		}
-		getOutput(FALLEN_OUTPUT).setVoltage(eoc.process(args.sampleTime) ? 10.f : 0.f);
+		getOutput(RISEN_OUTPUT).setVoltage(risen.process(args.sampleTime) ? 10.f : 0.f);
 		getOutput(MAIN_OUTPUT).setVoltage(out);
 	}
 };
