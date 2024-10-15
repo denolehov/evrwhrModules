@@ -147,7 +147,7 @@ struct Phoenix final : Module {
 		configInput(HIT_INPUT, "Hit");
 		configOutput(RISEN_OUTPUT, "Risen");
 		configOutput(FALLEN_OUTPUT, "Fallen");
-		configOutput(AUX_OUTPUT, "AUX");
+		configOutput(AUX_OUTPUT, "AUX (-5V/5V)");
 		configOutput(MAIN_OUTPUT, "Main");
 	}
 
@@ -201,6 +201,8 @@ struct Phoenix final : Module {
 		}
 		getOutput(FALLEN_OUTPUT).setVoltage(fallen.process(args.sampleTime) ? 10.f : 0.f);
 
+		const float aux = rescale(baseline.getCurrent(), 0.f, 1.f, -5.f, 5.f);
+		getOutput(AUX_OUTPUT).setVoltage(aux);
 		getOutput(MAIN_OUTPUT).setVoltage(out);
 	}
 };
