@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="30.48mm"
+   width="45.360001mm"
    height="128.5mm"
-   viewBox="0 0 30.48 128.5"
+   viewBox="0 0 45.360001 128.5"
    version="1.1"
    id="svg1"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
@@ -23,13 +23,13 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.2186177"
-     inkscape:cx="14.770834"
-     inkscape:cy="236.74365"
-     inkscape:window-width="2560"
-     inkscape:window-height="1328"
+     inkscape:zoom="1.2511483"
+     inkscape:cx="35.96696"
+     inkscape:cy="246.97312"
+     inkscape:window-width="1512"
+     inkscape:window-height="857"
      inkscape:window-x="0"
-     inkscape:window-y="25"
+     inkscape:window-y="38"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer2" />
   <defs
@@ -39,11 +39,195 @@
      id="layer2"
      inkscape:label="UI">
     <rect
+       style="display:inline;fill:#141414;fill-opacity:1;stroke-width:0.456463"
+       id="rect2"
+       width="45.360001"
+       height="128.5"
+       x="0"
+       y="0"
+       ry="0"
+       inkscape:label="BG_MODULE" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:4.93889px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+       x="12.327635"
+       y="13.984631"
+       id="text5"
+       inkscape:label="TEXT_LOGO"><tspan
+         sodipodi:role="line"
+         id="tspan4"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93889px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
+         x="12.327635"
+         y="13.984631">PHOENIX</tspan></text>
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.577829"
+       id="circle2"
+       cx="20.893236"
+       cy="25.23171"
+       inkscape:label="BG_FALL_PARAM"
+       transform="rotate(18.440514)"
+       r="8" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle22"
+       cx="28.480762"
+       cy="38.503258"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle38"
+       cx="29.190418"
+       cy="50.115196"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle40"
+       cx="-14.550122"
+       cy="52.851532"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle41"
+       cx="-13.840464"
+       cy="64.46347"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle42"
+       cx="41.787807"
+       cy="53.623283"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle43"
+       cx="1.9793553"
+       cy="77.635704"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle44"
+       cx="14.247553"
+       cy="79.869255"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle45"
+       cx="-6.3208866"
+       cy="86.727623"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle46"
+       cx="21.902754"
+       cy="89.966232"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle47"
+       cx="-6.5568218"
+       cy="99.455811"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle48"
+       cx="20.794664"
+       cy="102.4498"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle49"
+       cx="1.8216138"
+       cy="108.77621"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
+       id="circle50"
+       cx="14.471338"
+       cy="115.09953"
+       inkscape:label="BG_FALL_PARAM"
+       r="4.25"
+       transform="matrix(-0.94865258,0.31631991,0.31631991,0.94865258,0,0)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle51"
+       cx="48.146458"
+       cy="72.980331"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle52"
+       cx="45.168762"
+       cy="81.940659"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle53"
+       cx="56.07827"
+       cy="78.302986"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.180571"
+       id="circle54"
+       cx="52.994663"
+       cy="87.232964"
+       inkscape:label="BG_FALL_CV"
+       r="2.5"
+       transform="rotate(18.440514)" />
+    <circle
+       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.577829"
+       id="circle55"
+       cx="41.461674"
+       cy="18.373344"
+       inkscape:label="BG_FALL_PARAM"
+       transform="rotate(18.440514)"
+       r="8" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="components"
+     style="display:none" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="ref_UI"
+     transform="translate(-43)">
+    <rect
        style="display:inline;fill:#141414;fill-opacity:1;stroke-width:0.374177"
        id="rect1"
        width="30.48"
        height="128.5"
-       x="0"
+       x="0.35069576"
        y="0"
        ry="0"
        inkscape:label="BG_MODULE" />
@@ -67,13 +251,6 @@
        cx="22.25"
        cy="113.75"
        inkscape:label="BG_OUT"
-       r="4.25" />
-    <circle
-       style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
-       id="circle2"
-       cx="22.25"
-       cy="17.749695"
-       inkscape:label="BG_FALL_PARAM"
        r="4.25" />
     <circle
        style="display:inline;fill:#fffff0;fill-opacity:1;stroke-width:0.306971"
@@ -322,18 +499,6 @@
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
          x="0"
          y="0">LIN/EXP</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-weight:bold;font-size:4.93889px;font-family:'Caesar Dressing';-inkscape-font-specification:'Caesar Dressing Bold';display:none;fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-       x="4.8876343"
-       y="9.4766731"
-       id="text5"
-       inkscape:label="TEXT_LOGO"><tspan
-         sodipodi:role="line"
-         id="tspan4"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93889px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;fill-opacity:1;stroke-width:0.264583"
-         x="0"
-         y="0">PHOENIX</tspan></text>
     <path
        style="font-weight:bold;font-size:2.82222px;font-family:'Lilita One';-inkscape-font-specification:'Lilita One Bold';fill:#fffff0;stroke-width:0.264583"
        d="m 4.6432006,104.99296 v -1.00471 H 4.442823 q -0.047978,0 -0.067733,-0.12136 -0.00847,-0.0593 -0.00847,-0.12135 0,-0.0621 0.00847,-0.12136 0.019755,-0.12136 0.067733,-0.12136 h 0.9482659 q 0.047978,0 0.064911,0.12136 0.011289,0.0593 0.011289,0.12136 0,0.0621 -0.011289,0.12135 -0.016933,0.12136 -0.064911,0.12136 H 5.2020002 v 1.00471 h 0.1975554 q 0.047978,0 0.067733,0.12135 0.011289,0.0593 0.011289,0.12136 0,0.0621 -0.011289,0.12135 -0.019756,0.12136 -0.067733,0.12136 H 4.4484674 q -0.047978,0 -0.064911,-0.12136 -0.011289,-0.0593 -0.011289,-0.12135 0,-0.0621 0.011289,-0.12136 0.016933,-0.12135 0.064911,-0.12135 z m 2.5710449,0.42333 q 0,0.0593 -0.2652887,0.0593 -0.2652886,0 -0.2878664,-0.0423 l -0.4713108,-0.88053 v 0.87771 q 0,0.0508 -0.2624664,0.0508 -0.2596443,0 -0.2596443,-0.0508 v -1.88806 q 0,-0.0423 0.2229554,-0.0423 0.087489,0 0.2031999,0.0169 0.1185332,0.0141 0.1439332,0.0564 l 0.4515552,0.86924 v -0.88617 q 0,-0.0536 0.2624665,-0.0536 0.2624664,0 0.2624664,0.0536 z m 0.5277573,0.0677 q -0.2568221,0 -0.2568221,-0.0564 v -1.8288 q 0,-0.096 0.087489,-0.096 h 0.4967108 q 0.4176886,0 0.6011329,0.17216 0.1862665,0.17216 0.1862665,0.49953 0,0.27094 -0.1749777,0.49671 -0.087489,0.11289 -0.256822,0.18063 -0.1693332,0.0677 -0.3951108,0.0677 v 0.50518 q 0,0.0339 -0.1072444,0.048 -0.1044221,0.0113 -0.180622,0.0113 z m 0.2878664,-1.49013 v 0.44591 h 0.036689 q 0.098778,0 0.1665109,-0.0621 0.067733,-0.0621 0.067733,-0.17498 0,-0.11288 -0.047978,-0.16086 -0.045155,-0.048 -0.1636888,-0.048 z M 10.028,103.55927 q 0,-0.0564 0.3048,-0.0564 0.307622,0 0.307622,0.0564 v 1.2954 q 0,0.28786 -0.206022,0.47131 -0.206022,0.18062 -0.5700887,0.18062 -0.3612442,0 -0.589844,-0.18627 -0.2257776,-0.18908 -0.2257776,-0.508 v -1.25024 q 0,-0.0564 0.3047998,-0.0564 0.307622,0 0.307622,0.0564 v 1.27282 q 0,0.0565 0.059267,0.0903 0.062089,0.0339 0.1298221,0.0339 0.067733,0 0.1213555,-0.031 0.056444,-0.031 0.056444,-0.0931 z m 1.698977,1.87395 q 0,0.0564 -0.279399,0.0564 -0.2794,0 -0.2794,-0.0564 v -1.41675 h -0.338667 q -0.04798,0 -0.06773,-0.12982 -0.0085,-0.0621 -0.0085,-0.127 0,-0.0649 0.0085,-0.127 0.01976,-0.12983 0.06773,-0.12983 h 1.227666 q 0.04798,0 0.06773,0.12983 0.0085,0.0621 0.0085,0.127 0,0.0649 -0.0085,0.127 -0.01975,0.12982 -0.06773,0.12982 h -0.3302 z"
@@ -421,18 +586,19 @@
   </g>
   <g
      inkscape:groupmode="layer"
-     id="layer1"
-     inkscape:label="components"
-     style="display:none">
+     id="layer3"
+     inkscape:label="ref_components"
+     style="display:none"
+     transform="translate(-43)">
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
        id="circle9"
        cx="8.25"
        cy="17.749695"
        inkscape:label="RISE"
        r="4" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
        id="circle6"
        cx="22.25"
        cy="17.749695"
@@ -446,91 +612,91 @@
        inkscape:label="AUX"
        r="4" />
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle12"
        cx="8.25"
        cy="34.268539"
        inkscape:label="RISE"
        r="4" />
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle13"
        cx="8.5101328"
        cy="64.235413"
        inkscape:label="INVERT"
        r="4" />
     <circle
-       style="fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
        id="circle15"
        cx="8.25"
        cy="80.75"
        inkscape:label="RISEN"
        r="4" />
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle16"
        cx="8.25"
        cy="97.25"
        inkscape:label="MAIN"
        r="4" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
        id="circle27"
        cx="8.25"
        cy="26.009117"
        inkscape:label="RISE_CV"
        r="2" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
        id="circle28"
        cx="22.25"
        cy="26.009117"
        inkscape:label="FALL_CV"
        r="2" />
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle29"
        cx="22.25"
        cy="34.273479"
        inkscape:label="FALL"
        r="4" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
        id="circle30"
        cx="6.4910717"
        cy="49.037384"
        inkscape:label="OM"
        r="2" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
        id="circle31"
        cx="15.24"
        cy="49.037384"
        inkscape:label="AM"
        r="2" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.144457"
        id="circle32"
        cx="23.988928"
        cy="49.037384"
        inkscape:label="WM"
        r="2" />
     <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#ff0000;fill-opacity:1;stroke-width:0.288914"
        id="circle33"
        cx="22.25"
        cy="64.25"
        inkscape:label="LIN_EXP"
        r="4" />
     <circle
-       style="fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#0000ff;fill-opacity:1;stroke-width:0.288914"
        id="circle34"
        cx="22.25"
        cy="80.75"
        inkscape:label="FALLEN"
        r="4" />
     <circle
-       style="fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
+       style="display:inline;fill:#00ff00;fill-opacity:1;stroke-width:0.288914"
        id="circle35"
        cx="22.25"
        cy="97.25"
