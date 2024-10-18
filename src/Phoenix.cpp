@@ -265,13 +265,14 @@ struct Phoenix final : Module {
 
 		const bool hitTriggered = hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f);
 		if (hitTriggered) {
-			const float hitStrength = attenuvert(getParam(HIT_CV_PARAM).getValue(), HIT_CV_INPUT, HIT_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
+			const float hitStrength = attenuvert(getParam(FALL_PARAM).getValue(), HIT_CV_INPUT, HIT_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
 			baseline.hit(hitStrength);
 		}
 
 		const bool riseTriggered = riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
 		if (riseTriggered) {
-			baseline.recover(1.f);
+			const float riseStrength = attenuvert(getParam(RISE_PARAM).getValue(), RISE_CV_INPUT, RISE_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
+			baseline.recover(riseStrength);
 		}
 
 		baseline.process(args.sampleTime);
