@@ -1,54 +1,114 @@
 #include "plugin.hpp"
 
-const float EPSILON = 1e-3f;
-
 struct BaselineTracker {
 	enum State { IDLE, FALLING, RISING } state = IDLE;
 
-	float recoverBaseline = 1.f, fallBaseline = 0.f;
+	float baseline = 1.f;
 	float start = 1.f, current = 1.f, target = 1.f;
 	float progress = 0.f;
 
-	float MIN_SPEED = 2.0f; // TODO: Change this back to 0.f;
-	float fallSpeed = MIN_SPEED, riseSpeed = MIN_SPEED / 2.f;
+	float MIN_SPEED = 0.0f;
+	float fallSpeed = MIN_SPEED, riseSpeed = MIN_SPEED;
 
-	void updateState() {
-		if (fabs(current - target) < EPSILON) {
-			if (fabs(target - recoverBaseline) < EPSILON) {
-				// Recovered.
-				state = IDLE;
-				return;
-			}
-
-			// Reached target, but not recovered yet. So start recovering.
-			start = current;
-			target = recoverBaseline;
-			progress = 0.f;
-			state = RISING;
-
-			return;
+	void processState() {
+		// B = T = C
+		if (baseline == target && target == current) {
+			state = IDLE;
 		}
 
-		if (current > target + EPSILON) {
-			state = FALLING;
-		} else if (current < target - EPSILON) {
+		// B = T > C
+		if (baseline == target && target > current) {
 			state = RISING;
-		} else {
-			// Current is close enough to target.
-			current = target;
+		}
+
+		// B = T < C
+		if (baseline == target && target < current) {
+			state = FALLING;
+		}
+
+		// B = C > T
+		if (baseline == current && current > target) {
+			state = FALLING;
+		}
+
+		// B = C < T
+		if (baseline == current && current < target) {
+			state = RISING;
+		}
+
+		// T = C > B
+		if (target == current && current > baseline) {
+			target = baseline;
+			start = current;
+			progress = 0.f;
+			state = FALLING;
+		}
+
+		// T = C < B
+		if (target == current && current < baseline) {
+			target = baseline;
+			start = current;
+			progress = 0.f;
+			state = RISING;
+		}
+
+		// B > T > C
+		if (baseline > target && target > current) {
+			state = RISING;
+		}
+
+		// B > C > T
+		if (baseline > current && current > target) {
+			state = FALLING;
+		}
+
+		// T > B > C
+		if (target > baseline && baseline > current) {
+			target = baseline;
+			progress = 0.f;
+			state = RISING;
+		}
+
+		// T > C > B
+		if (target > current && current > baseline) {
+			state = RISING;
+		}
+
+		// C > B > T
+		if (current > baseline && baseline > target) {
+			target = baseline;
+			progress = 0.f;
+			state = FALLING;
+		}
+
+		// C > T > B
+		if (current > target && target > baseline) {
+			state = FALLING;
 		}
 	}
 
 	float process(const float delta) {
-		updateState();
+		processState();
 
 		if (state == IDLE) {
 			return current;
 		}
 
 		progress += delta;
-		const float p = clamp(progress / (state == RISING ? riseSpeed : fallSpeed), 0.f, 1.f); // TODO: Handle potential division by 0.
+		const float speed = state == RISING ? riseSpeed : fallSpeed;
+		float p = 1.f;
+		if (speed > 0.f) {
+			p = clamp(progress / speed, 0.f, 1.f);
+		}
+
 		current = crossfade(start, target, p);
+
+		// if current is "close enough" to target, just snap it to target
+		if (fabs(current - target) < 0.001f) {
+			current = target;
+		}
+
+		DEBUG("STATE: %d, PROGRESS: %f, CURRENT: %f, TARGET: %f, BASELINE: %f", state, progress, current, target, baseline);
 
 		return current;
 	}
@@ -58,15 +118,15 @@ struct BaselineTracker {
 	}
 
 	void hit(const float strength) {
-		target = clampSafe(current - strength, fallBaseline, recoverBaseline);
+		target = clamp(current - strength, 0.f, 1.f);
+		progress = state == FALLING ? progress : 0.f;
 		start = current;
-		progress = state == FALLING ? progress * 1.2f : 0.f;
 	}
 
 	void recover(const float strength) {
-		target = clampSafe(current + strength, fallBaseline, recoverBaseline);
+		target = clamp(current + strength, 0.f, 1.f);
+		progress = state == RISING ? progress : 0.f;
 		start = current;
-		progress = state == RISING ? progress * 1.2f : 0.f;
 	}
 
 	void setRiseSpeed(const float value) {
@@ -75,6 +135,18 @@ struct BaselineTracker {
 
 	void setFallSpeed(const float value) {
 		fallSpeed = std::max(value, MIN_SPEED);
+	}
+
+	void invert() {
+		baseline = 1.f - baseline;
+		target = 1.f - target;
+		start = current;
+		progress = 0.f;
+		DEBUG("INVERTED: %d", isInverted());
+	}
+
+	bool isInverted() const {
+		return baseline < 0.5f;
 	}
 };
 
@@ -132,11 +204,16 @@ struct Phoenix final : Module {
 	BaselineTracker baseline;
 
 	dsp::SchmittTrigger hitTrigger, riseTrigger;
+	dsp::SchmittTrigger invertTrigger;
+
+	// Buttons
+	dsp::BooleanTrigger hitTriggerButton, riseTriggerButton;
+	dsp::BooleanTrigger invertTriggerButton;
 
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(HIT_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RISE_PARAM, 0.f, 1.f, 0.f, "");
+		configButton(HIT_PARAM, "Hit");
+		configButton(RISE_PARAM , "Rise");
 		configParam(INVERT_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(FALL_SPEED_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(RISE_SPEED_PARAM, 0.f, 1.f, 0.f, "");
@@ -165,12 +242,25 @@ struct Phoenix final : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		if (hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f)) {
-			baseline.hit(.33f);
+		const bool invertTriggered = invertTriggerButton.process(getParam(INVERT_PARAM).getValue()) ||
+			invertTrigger.process(getInput(INVERT_INPUT).getVoltage(), 0.1f, 1.f);
+
+		if (invertTriggered) {
+			baseline.invert();
 		}
 
-		if (riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f)) {
-			baseline.recover(.33f);
+		const bool hitTriggered = hitTriggerButton.process(getParam(HIT_PARAM).getValue()) ||
+			hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f);
+
+		if (hitTriggered) {
+			baseline.hit(1.f);
+		}
+
+		const bool riseTriggered = riseTriggerButton.process(getParam(RISE_PARAM).getValue()) ||
+			riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
+
+		if (riseTriggered) {
+			baseline.recover(1.f);
 		}
 
 		baseline.process(args.sampleTime);
@@ -180,6 +270,16 @@ struct Phoenix final : Module {
 
 		getOutput(MAIN_OUTPUT).setVoltage(out);
 		getOutput(AUX_OUTPUT).setVoltage(rescale(baseline.getCurrent(), 0.f, 1.f, -5.f, 5.f));
+
+		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, args.sampleTime);
+		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, args.sampleTime);
+		setLight(INVERT_PARAM_LIGHT, baseline.isInverted() ? 1.f : 0.f, args.sampleTime);
+	}
+
+	void setLight(const LightId id, const float brightness, const float delta) {
+		getLight(id + 0).setBrightnessSmooth(brightness, delta);
+		getLight(id + 1).setBrightnessSmooth(brightness, delta);
+		getLight(id + 2).setBrightnessSmooth(brightness, delta);
 	}
 };
 
@@ -194,9 +294,9 @@ struct PhoenixWidget final : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(8.25, 25.5)), module, Phoenix::HIT_PARAM, Phoenix::HIT_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(32.39, 25.5)), module, Phoenix::RISE_PARAM, Phoenix::RISE_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 29.574)), module, Phoenix::INVERT_PARAM, Phoenix::INVERT_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(8.25, 25.5)), module, Phoenix::HIT_PARAM, Phoenix::HIT_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(32.39, 25.5)), module, Phoenix::RISE_PARAM, Phoenix::RISE_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 29.574)), module, Phoenix::INVERT_PARAM, Phoenix::INVERT_PARAM_LIGHT));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(8.25, 40.25)), module, Phoenix::FALL_SPEED_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(32.39, 40.25)), module, Phoenix::RISE_SPEED_PARAM));
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 40.75)), module, Phoenix::HIT_MODE_PARAM, Phoenix::HIT_MODE_PARAM_LIGHT));
