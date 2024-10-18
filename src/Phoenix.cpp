@@ -104,11 +104,9 @@ struct BaselineTracker {
 		current = crossfade(start, target, p);
 
 		// if current is "close enough" to target, just snap it to target
-		if (fabs(current - target) < 0.001f) {
+		if (fabs(current - target) < 0.0001f) {
 			current = target;
 		}
-
-		DEBUG("STATE: %d, PROGRESS: %f, CURRENT: %f, TARGET: %f, BASELINE: %f", state, progress, current, target, baseline);
 
 		return current;
 	}
@@ -142,7 +140,6 @@ struct BaselineTracker {
 		target = 1.f - target;
 		start = current;
 		progress = 0.f;
-		DEBUG("INVERTED: %d", isInverted());
 	}
 
 	bool isInverted() const {
@@ -210,16 +207,19 @@ struct Phoenix final : Module {
 	dsp::BooleanTrigger hitTriggerButton, riseTriggerButton;
 	dsp::BooleanTrigger invertTriggerButton;
 
+	// Min, Max, Default
+	const float MIN_SPEED = 1e-3f, MAX_SPEED = 60.f, DEFAULT_SPEED = 1.f;
+
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configButton(HIT_PARAM, "Hit");
 		configButton(RISE_PARAM , "Rise");
 		configParam(INVERT_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FALL_SPEED_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RISE_SPEED_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(FALL_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Fall speed", " s", 2);
+		configParam(RISE_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Rise speed", " s", 2);
 		configParam(HIT_MODE_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FALL_SPEED_CV_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RISE_SPEED_CV_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(FALL_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Fall speed CV");
+		configParam(RISE_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Rise speed CV");
 		configParam(IO_RANGE_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(FALLING_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(RISING_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
@@ -231,8 +231,8 @@ struct Phoenix final : Module {
 		configInput(RISE_INPUT, "Rise");
 		configInput(INVERT_INPUT, "");
 		configInput(MAIN_INPUT, "Main");
-		configInput(FALL_SPEED_CV_INPUT, "");
-		configInput(RISE_SPEED_CV_INPUT, "");
+		configInput(FALL_SPEED_CV_INPUT, "Fall speed CV");
+		configInput(RISE_SPEED_CV_INPUT, "Rise speed CV");
 		configOutput(MAIN_OUTPUT, "Main");
 		configOutput(FALLING_OUTPUT, "");
 		configOutput(RISING_OUTPUT, "");
@@ -242,6 +242,12 @@ struct Phoenix final : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		const float fallSpeed = std::exp2(getParam(FALL_SPEED_PARAM).getValue());
+		baseline.setFallSpeed(attenuvert(fallSpeed, FALL_SPEED_CV_INPUT, FALL_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
+
+		const float riseSpeed = std::exp2(getParam(RISE_SPEED_PARAM).getValue());
+		baseline.setRiseSpeed(attenuvert(riseSpeed, RISE_SPEED_CV_INPUT, RISE_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
+
 		const bool invertTriggered = invertTriggerButton.process(getParam(INVERT_PARAM).getValue()) ||
 			invertTrigger.process(getInput(INVERT_INPUT).getVoltage(), 0.1f, 1.f);
 
@@ -274,6 +280,18 @@ struct Phoenix final : Module {
 		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, args.sampleTime);
 		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, args.sampleTime);
 		setLight(INVERT_PARAM_LIGHT, baseline.isInverted() ? 1.f : 0.f, args.sampleTime);
+	}
+
+	float attenuvert(const float param, const InputId cvInput, const ParamId cvParam, const float paramMin, const float paramMax) {
+		if (!getInput(cvInput).isConnected()) {
+			return param;
+		}
+
+		const float att = getParam(cvParam).getValue();
+		float in = getInput(cvInput).getVoltage();
+		in = rescale(in, -5.f, 5.f, paramMin, paramMax);
+
+		return clamp(param + in * att, paramMin, paramMax);
 	}
 
 	void setLight(const LightId id, const float brightness, const float delta) {
