@@ -198,6 +198,24 @@ struct Phoenix final : Module {
 		LIGHTS_LEN
 	};
 
+	struct Range {
+		float min, max;
+	};
+
+	enum RangeMode { BI_10, BI_5, UNI_10, UNI_5, NUM_RANGE_MODES };
+
+	std::map<RangeMode, Range> ioRanges = {
+		{BI_10, {-10.f, 10.f}},
+		{BI_5, {-5.f, 5.f}},
+		{UNI_10, {0.f, 10.f}},
+		{UNI_5, {0.f, 5.f}}
+	};
+
+	RangeMode ioRangeMode = BI_10;
+	RangeMode auxRangeMode = BI_5;
+	Range ioRange = ioRanges[ioRangeMode];
+	Range auxRange = ioRanges[auxRangeMode];
+
 	BaselineTracker baseline;
 
 	// Input triggers
@@ -206,6 +224,7 @@ struct Phoenix final : Module {
 
 	// Buttons
 	dsp::BooleanTrigger invertTriggerButton;
+	dsp::BooleanTrigger ioRangeButton, auxRangeButton;
 
 	// Min, Max, Defaults
 	const float MIN_SPEED = 1e-3f, MAX_SPEED = 60.f, DEFAULT_SPEED = 1.f;
@@ -275,17 +294,32 @@ struct Phoenix final : Module {
 			baseline.recover(riseStrength);
 		}
 
+		const bool ioRangeChanged = ioRangeButton.process(getParam(IO_RANGE_PARAM).getValue());
+		if (ioRangeChanged) {
+			ioRangeMode = static_cast<RangeMode>((ioRangeMode + 1) % NUM_RANGE_MODES);
+			ioRange = ioRanges[ioRangeMode];
+		}
+
+		const bool auxRangeChanged = auxRangeButton.process(getParam(AUX_RANGE_PARAM).getValue());
+		if (auxRangeChanged) {
+			auxRangeMode = static_cast<RangeMode>((auxRangeMode + 1) % NUM_RANGE_MODES);
+			auxRange = ioRanges[auxRangeMode];
+		}
+
 		baseline.process(args.sampleTime);
 
-		const float input = getInput(MAIN_INPUT).getVoltage();
+		const float input = clamp(getInput(MAIN_INPUT).getVoltage(), ioRange.min, ioRange.max);
 		const float out = input * baseline.getCurrent();
 
-		getOutput(MAIN_OUTPUT).setVoltage(out);
-		getOutput(AUX_OUTPUT).setVoltage(rescale(baseline.getCurrent(), 0.f, 1.f, -5.f, 5.f));
+		getOutput(MAIN_OUTPUT).setVoltage(clamp(out, ioRange.min, ioRange.max));
+		getOutput(AUX_OUTPUT).setVoltage(rescale(baseline.getCurrent(), 0.f, 1.f, auxRange.min, auxRange.max));
 
-		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, args.sampleTime);
-		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, args.sampleTime);
-		setLight(INVERT_PARAM_LIGHT, baseline.isInverted() ? 1.f : 0.f, args.sampleTime);
+		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
+		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
+		setLight(INVERT_PARAM_LIGHT, baseline.isInverted() ? 1.f : 0.f, WHITE, args.sampleTime);
+
+		setLight(IO_RANGE_PARAM_LIGHT, 1.f, rangeColors[ioRangeMode], args.sampleTime);
+		setLight(AUX_RANGE_PARAM_LIGHT, 1.f, rangeColors[auxRangeMode], args.sampleTime);
 	}
 
 	float attenuvert(const float param, const InputId cvInput, const ParamId cvParam, const float paramMin, const float paramMax) {
@@ -300,10 +334,30 @@ struct Phoenix final : Module {
 		return clamp(param + in * att, paramMin, paramMax);
 	}
 
-	void setLight(const LightId id, const float brightness, const float delta) {
-		getLight(id + 0).setBrightnessSmooth(brightness, delta);
-		getLight(id + 1).setBrightnessSmooth(brightness, delta);
-		getLight(id + 2).setBrightnessSmooth(brightness, delta);
+	enum Color { WHITE, DARK_BLUE, TEAL, BRIGHT_ORANGE, LIME_GREEN };
+	struct RGB { float r, g, b; };
+
+	std::map<Color, RGB> colors = {
+		{WHITE, {1.f, 1.f, 1.f}},
+		{DARK_BLUE, {0.0f, 0.2f, 0.6f}},
+		{TEAL, {0.0f, 0.502f, 0.502f}},
+		{BRIGHT_ORANGE, {1.f, 0.647f, 0.0f}},
+		{LIME_GREEN, {0.196f, 0.804f, 0.196f}}
+	};
+
+	std::map<RangeMode, Color> rangeColors = {
+		{BI_10, DARK_BLUE},
+		{BI_5, TEAL},
+		{UNI_10, BRIGHT_ORANGE},
+		{UNI_5, LIME_GREEN}
+	};
+
+	void setLight(const LightId id, const float brightness, Color color, const float delta) {
+		const RGB& rgb = colors[color];
+
+		getLight(id + 0).setBrightnessSmooth(brightness * rgb.r, delta);
+		getLight(id + 1).setBrightnessSmooth(brightness * rgb.g, delta);
+		getLight(id + 2).setBrightnessSmooth(brightness * rgb.b, delta);
 	}
 };
 
