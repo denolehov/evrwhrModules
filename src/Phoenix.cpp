@@ -216,6 +216,8 @@ struct Phoenix final : Module {
 	Range ioRange = ioRanges[ioRangeMode];
 	Range auxRange = ioRanges[auxRangeMode];
 
+	enum AttenuationMode { VCA, Nudge, NUM_ATT_MODES } attMode = VCA;
+
 	BaselineTracker baseline;
 
 	// Input triggers
@@ -225,6 +227,7 @@ struct Phoenix final : Module {
 	// Buttons
 	dsp::BooleanTrigger invertTriggerButton;
 	dsp::BooleanTrigger ioRangeButton, auxRangeButton;
+	dsp::BooleanTrigger attModeButton;
 
 	// Min, Max, Defaults
 	const float MIN_SPEED = 1e-3f, MAX_SPEED = 60.f, DEFAULT_SPEED = 1.f;
@@ -306,10 +309,26 @@ struct Phoenix final : Module {
 			auxRange = ioRanges[auxRangeMode];
 		}
 
+		const bool attModeChanged = attModeButton.process(getParam(ATT_MODE_PARAM).getValue());
+		if (attModeChanged) {
+			attMode = static_cast<AttenuationMode>((attMode + 1) % NUM_ATT_MODES);
+		}
+
 		baseline.process(args.sampleTime);
 
 		const float input = clamp(getInput(MAIN_INPUT).getVoltage(), ioRange.min, ioRange.max);
-		const float out = input * baseline.getCurrent();
+
+		float out = input;
+		switch (attMode) {
+			case VCA:
+				out *= baseline.getCurrent();
+				break;
+			case Nudge:
+			default:
+				const float new_max = rescale(baseline.getCurrent(), 0.f, 1.f, ioRange.min, ioRange.max);
+				out = rescale(input, ioRange.min, ioRange.max, ioRange.min, new_max);
+				break;
+		}
 
 		getOutput(MAIN_OUTPUT).setVoltage(clamp(out, ioRange.min, ioRange.max));
 		getOutput(AUX_OUTPUT).setVoltage(rescale(baseline.getCurrent(), 0.f, 1.f, auxRange.min, auxRange.max));
@@ -320,6 +339,8 @@ struct Phoenix final : Module {
 
 		setLight(IO_RANGE_PARAM_LIGHT, 1.f, rangeColors[ioRangeMode], args.sampleTime);
 		setLight(AUX_RANGE_PARAM_LIGHT, 1.f, rangeColors[auxRangeMode], args.sampleTime);
+
+		setLight(ATT_MODE_PARAM_LIGHT, 1.f, attColors[attMode], args.sampleTime);
 	}
 
 	float attenuvert(const float param, const InputId cvInput, const ParamId cvParam, const float paramMin, const float paramMax) {
@@ -334,7 +355,7 @@ struct Phoenix final : Module {
 		return clamp(param + in * att, paramMin, paramMax);
 	}
 
-	enum Color { WHITE, DARK_BLUE, TEAL, BRIGHT_ORANGE, LIME_GREEN };
+	enum Color { WHITE, DARK_BLUE, TEAL, BRIGHT_ORANGE, LIME_GREEN, BRIGHT_YELLOW, DEEP_RED };
 	struct RGB { float r, g, b; };
 
 	std::map<Color, RGB> colors = {
@@ -342,7 +363,9 @@ struct Phoenix final : Module {
 		{DARK_BLUE, {0.0f, 0.2f, 0.6f}},
 		{TEAL, {0.0f, 0.502f, 0.502f}},
 		{BRIGHT_ORANGE, {1.f, 0.647f, 0.0f}},
-		{LIME_GREEN, {0.196f, 0.804f, 0.196f}}
+		{LIME_GREEN, {0.196f, 0.804f, 0.196f}},
+		{BRIGHT_YELLOW, {1.f, 0.85f, 0.0f}},
+		{DEEP_RED, {0.8f, 0.0f, 0.0f}},
 	};
 
 	std::map<RangeMode, Color> rangeColors = {
@@ -350,6 +373,11 @@ struct Phoenix final : Module {
 		{BI_5, TEAL},
 		{UNI_10, BRIGHT_ORANGE},
 		{UNI_5, LIME_GREEN}
+	};
+
+	std::map<AttenuationMode, Color> attColors = {
+		{VCA, BRIGHT_YELLOW},
+		{Nudge, DEEP_RED}
 	};
 
 	void setLight(const LightId id, const float brightness, Color color, const float delta) {
