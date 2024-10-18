@@ -150,17 +150,17 @@ struct BaselineTracker {
 
 struct Phoenix final : Module {
 	enum ParamId {
-		HIT_PARAM,
+		FALL_PARAM,
 		RISE_PARAM,
-		INVERT_PARAM,
+		IO_RANGE_PARAM,
+		HIT_CV_PARAM,
+		RISE_CV_PARAM,
+		HIT_MODE_PARAM,
 		FALL_SPEED_PARAM,
 		RISE_SPEED_PARAM,
-		HIT_MODE_PARAM,
 		FALL_SPEED_CV_PARAM,
 		RISE_SPEED_CV_PARAM,
-		IO_RANGE_PARAM,
-		FALLING_SWITCH_PARAM,
-		RISING_SWITCH_PARAM,
+		INVERT_PARAM,
 		AUX_RANGE_PARAM,
 		FALL_LIN_EXP_PARAM,
 		RISE_LIN_EXP_PARAM,
@@ -170,16 +170,16 @@ struct Phoenix final : Module {
 	enum InputId {
 		HIT_INPUT,
 		RISE_INPUT,
-		INVERT_INPUT,
 		MAIN_INPUT,
+		HIT_CV_INPUT,
+		RISE_CV_INPUT,
+		INVERT_INPUT,
 		FALL_SPEED_CV_INPUT,
 		RISE_SPEED_CV_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
 		MAIN_OUTPUT,
-		FALLING_OUTPUT,
-		RISING_OUTPUT,
 		AUX_OUTPUT,
 		FALLEN_OUTPUT,
 		RISEN_OUTPUT,
@@ -200,45 +200,54 @@ struct Phoenix final : Module {
 
 	BaselineTracker baseline;
 
+	// Input triggers
 	dsp::SchmittTrigger hitTrigger, riseTrigger;
 	dsp::SchmittTrigger invertTrigger;
 
 	// Buttons
-	dsp::BooleanTrigger hitTriggerButton, riseTriggerButton;
 	dsp::BooleanTrigger invertTriggerButton;
 
-	// Min, Max, Default
+	// Min, Max, Defaults
 	const float MIN_SPEED = 1e-3f, MAX_SPEED = 60.f, DEFAULT_SPEED = 1.f;
+	const float MIN_STRENGTH = 1e-3f, MAX_STRENGTH = 1.f, DEFAULT_STRENGTH = 1.f;
 
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configButton(HIT_PARAM, "Hit");
-		configButton(RISE_PARAM , "Rise");
-		configParam(INVERT_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FALL_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Fall speed", " s", 2);
-		configParam(RISE_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Rise speed", " s", 2);
-		configParam(HIT_MODE_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FALL_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Fall speed CV");
-		configParam(RISE_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Rise speed CV");
-		configParam(IO_RANGE_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FALLING_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RISING_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(AUX_RANGE_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FALL_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RISE_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(ATT_MODE_PARAM, 0.f, 1.f, 0.f, "");
+
 		configInput(HIT_INPUT, "Hit");
 		configInput(RISE_INPUT, "Rise");
-		configInput(INVERT_INPUT, "");
-		configInput(MAIN_INPUT, "Main");
+		configInput(HIT_CV_INPUT, "Hit strength CV");
+		configInput(RISE_CV_INPUT, "Rise strength CV");
+
+		configParam(FALL_PARAM, MIN_STRENGTH, MAX_STRENGTH, DEFAULT_STRENGTH, "Hit strength");
+		configParam(HIT_CV_PARAM, -1.f, 1.f, 0.f, "Hit strength CV");
+
+		configParam(RISE_PARAM, MIN_STRENGTH, MAX_STRENGTH, DEFAULT_STRENGTH, "Rise strength");
+		configParam(RISE_CV_PARAM, -1.f, 1.f, 0.f, "Hit strength CV");
+
+		configParam(FALL_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Fall speed", " s", 2);
+		configParam(FALL_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Fall speed CV");
 		configInput(FALL_SPEED_CV_INPUT, "Fall speed CV");
+		configParam(FALL_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "");
+
+		configParam(RISE_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Rise speed", " s", 2);
+		configParam(RISE_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Rise speed CV");
 		configInput(RISE_SPEED_CV_INPUT, "Rise speed CV");
+		configParam(RISE_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "");
+
+		configButton(INVERT_PARAM, "Invert");
+		configInput(INVERT_INPUT, "Invert");
+
+		configButton(IO_RANGE_PARAM, "Input / Output range");
+		configButton(HIT_MODE_PARAM, "Hit mode");
+		configButton(AUX_RANGE_PARAM, "AUX range");
+		configButton(ATT_MODE_PARAM, "Attenuation mode");
+
+		configInput(MAIN_INPUT, "Main");
 		configOutput(MAIN_OUTPUT, "Main");
-		configOutput(FALLING_OUTPUT, "");
-		configOutput(RISING_OUTPUT, "");
 		configOutput(AUX_OUTPUT, "AUX");
-		configOutput(FALLEN_OUTPUT, "");
-		configOutput(RISEN_OUTPUT, "");
+		configOutput(FALLEN_OUTPUT, "Fallen");
+		configOutput(RISEN_OUTPUT, "Risen");
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -250,21 +259,17 @@ struct Phoenix final : Module {
 
 		const bool invertTriggered = invertTriggerButton.process(getParam(INVERT_PARAM).getValue()) ||
 			invertTrigger.process(getInput(INVERT_INPUT).getVoltage(), 0.1f, 1.f);
-
 		if (invertTriggered) {
 			baseline.invert();
 		}
 
-		const bool hitTriggered = hitTriggerButton.process(getParam(HIT_PARAM).getValue()) ||
-			hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f);
-
+		const bool hitTriggered = hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f);
 		if (hitTriggered) {
-			baseline.hit(1.f);
+			const float hitStrength = attenuvert(getParam(HIT_CV_PARAM).getValue(), HIT_CV_INPUT, HIT_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
+			baseline.hit(hitStrength);
 		}
 
-		const bool riseTriggered = riseTriggerButton.process(getParam(RISE_PARAM).getValue()) ||
-			riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
-
+		const bool riseTriggered = riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
 		if (riseTriggered) {
 			baseline.recover(1.f);
 		}
@@ -312,32 +317,34 @@ struct PhoenixWidget final : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(8.25, 25.5)), module, Phoenix::HIT_PARAM, Phoenix::HIT_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(32.39, 25.5)), module, Phoenix::RISE_PARAM, Phoenix::RISE_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 29.574)), module, Phoenix::INVERT_PARAM, Phoenix::INVERT_PARAM_LIGHT));
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(8.25, 40.25)), module, Phoenix::FALL_SPEED_PARAM));
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(32.39, 40.25)), module, Phoenix::RISE_SPEED_PARAM));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 40.75)), module, Phoenix::HIT_MODE_PARAM, Phoenix::HIT_MODE_PARAM_LIGHT));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(8.25, 50.0)), module, Phoenix::FALL_SPEED_CV_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(32.39, 50.0)), module, Phoenix::RISE_SPEED_CV_PARAM));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 65.25)), module, Phoenix::IO_RANGE_PARAM, Phoenix::IO_RANGE_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(8.25, 85.0)), module, Phoenix::FALLING_SWITCH_PARAM, Phoenix::FALLING_SWITCH_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(32.39, 85.0)), module, Phoenix::RISING_SWITCH_PARAM, Phoenix::RISING_SWITCH_PARAM_LIGHT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 98.711)), module, Phoenix::AUX_RANGE_PARAM, Phoenix::AUX_RANGE_PARAM_LIGHT));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(8.25, 28.101)), module, Phoenix::FALL_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(32.39, 28.101)), module, Phoenix::RISE_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(8.25, 60.923)), module, Phoenix::FALL_SPEED_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(32.39, 60.923)), module, Phoenix::RISE_SPEED_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(8.25, 110.25)), module, Phoenix::FALL_LIN_EXP_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(32.39, 110.25)), module, Phoenix::RISE_LIN_EXP_PARAM));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 112.75)), module, Phoenix::ATT_MODE_PARAM, Phoenix::ATT_MODE_PARAM_LIGHT));
+
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 75.5)), module, Phoenix::INVERT_PARAM, Phoenix::INVERT_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 53.137)), module, Phoenix::HIT_MODE_PARAM, Phoenix::HIT_MODE_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 31.074)), module, Phoenix::IO_RANGE_PARAM, Phoenix::IO_RANGE_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 98.711)), module, Phoenix::AUX_RANGE_PARAM, Phoenix::AUX_RANGE_PARAM_LIGHT));
+		addParam(createLightParamCentered<VCVLightButton<LargeSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(20.32, 112.75)), module, Phoenix::ATT_MODE_PARAM, Phoenix::ATT_MODE_PARAM_LIGHT));
+
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(8.25, 37.851)), module, Phoenix::HIT_CV_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(32.39, 37.851)), module, Phoenix::RISE_CV_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(8.25, 70.673)), module, Phoenix::FALL_SPEED_CV_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(32.39, 70.673)), module, Phoenix::RISE_SPEED_CV_PARAM));
 
 		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 15.574)), module, Phoenix::HIT_INPUT));
 		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(32.39, 15.574)), module, Phoenix::RISE_INPUT));
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 19.824)), module, Phoenix::INVERT_INPUT));
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 55.5)), module, Phoenix::MAIN_INPUT));
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 59.75)), module, Phoenix::FALL_SPEED_CV_INPUT));
-		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(32.39, 59.75)), module, Phoenix::RISE_SPEED_CV_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 21.324)), module, Phoenix::MAIN_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 47.777)), module, Phoenix::HIT_CV_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(32.39, 47.777)), module, Phoenix::RISE_CV_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 65.75)), module, Phoenix::INVERT_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 80.423)), module, Phoenix::FALL_SPEED_CV_INPUT));
+		addInput(createInputCentered<DarkPJ301MPort>(mm2px(Vec(32.39, 80.423)), module, Phoenix::RISE_SPEED_CV_INPUT));
 
-		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 75.0)), module, Phoenix::MAIN_OUTPUT));
-		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 75.25)), module, Phoenix::FALLING_OUTPUT));
-		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(32.39, 75.25)), module, Phoenix::RISING_OUTPUT));
+		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 40.824)), module, Phoenix::MAIN_OUTPUT));
 		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(20.32, 88.961)), module, Phoenix::AUX_OUTPUT));
 		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(8.25, 94.75)), module, Phoenix::FALLEN_OUTPUT));
 		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(32.39, 94.75)), module, Phoenix::RISEN_OUTPUT));

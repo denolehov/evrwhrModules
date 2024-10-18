@@ -24,14 +24,14 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.5301888"
-     inkscape:cx="35.943277"
-     inkscape:cy="188.86558"
+     inkscape:zoom="2.4982893"
+     inkscape:cx="60.041086"
+     inkscape:cy="142.49751"
      inkscape:window-width="1512"
      inkscape:window-height="857"
      inkscape:window-x="512"
      inkscape:window-y="1478"
-     inkscape:window-maximized="1"
+     inkscape:window-maximized="0"
      inkscape:current-layer="layer1" />
   <defs
      id="defs1">
@@ -80,44 +80,37 @@
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle12"
        cx="8.25"
-       cy="25.499668"
+       cy="37.850662"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle13"
        cx="8.25"
-       cy="40.249668"
+       cy="60.922871"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle14"
        cx="8.25"
-       cy="49.999668"
+       cy="70.672867"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle15"
        cx="8.25"
-       cy="59.749668"
+       cy="80.422874"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle16"
        cx="8.25"
-       cy="75.249664"
+       cy="28.101"
        r="4.25"
        inkscape:label="BG_INPUT" />
-    <circle
-       style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
-       id="circle17"
-       cx="8.25"
-       cy="84.999664"
-       inkscape:label="BG_RISE_SPEED_CV"
-       r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle18"
@@ -143,44 +136,37 @@
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle21"
        cx="32.389999"
-       cy="25.500002"
+       cy="37.850994"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle22"
        cx="32.389999"
-       cy="40.25"
+       cy="60.923203"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle23"
        cx="32.389999"
-       cy="50"
+       cy="70.673203"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle24"
        cx="32.389999"
-       cy="59.75"
+       cy="80.423203"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle25"
        cx="32.389999"
-       cy="75.25"
+       cy="28.101336"
        r="4.25"
        inkscape:label="BG_INPUT" />
-    <circle
-       style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
-       id="circle26"
-       cx="32.389999"
-       cy="85"
-       inkscape:label="BG_RISE_SPEED_CV"
-       r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle27"
@@ -199,7 +185,7 @@
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle31"
        cx="20.32"
-       cy="40.75"
+       cy="53.137444"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
@@ -213,35 +199,35 @@
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle33"
        cx="20.32"
-       cy="55.499668"
+       cy="21.324001"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle34"
        cx="20.32"
-       cy="65.249664"
+       cy="31.073997"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle35"
        cx="20.32"
-       cy="74.999664"
+       cy="40.823997"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
        id="circle36"
        cx="20.32"
-       cy="19.823668"
+       cy="65.75"
        r="4.25"
        inkscape:label="BG_INPUT" />
     <circle
        style="fill:#fffff0;fill-opacity:1;stroke-width:0.465138"
        id="circle37"
        cx="20.32"
-       cy="29.573668"
+       cy="75.5"
        inkscape:label="BG_RISE_SPEED_CV"
        r="3.5" />
     <circle
@@ -266,6 +252,20 @@
        x="10.816545"
        y="123.28857"
        inkscape:label="LOGO_THING" />
+    <circle
+       style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
+       id="circle79"
+       cx="8.25"
+       cy="47.776997"
+       r="4.25"
+       inkscape:label="BG_INPUT" />
+    <circle
+       style="fill:#fffff0;fill-opacity:1;stroke-width:0.564809"
+       id="circle80"
+       cx="32.389999"
+       cy="47.777328"
+       r="4.25"
+       inkscape:label="BG_INPUT" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -299,21 +299,21 @@
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle1"
        cx="8.25"
-       cy="25.499668"
-       inkscape:label="HIT"
+       cy="37.850662"
+       inkscape:label="HIT_CV"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle45"
        cx="32.389999"
-       cy="25.500002"
-       inkscape:label="RISE"
+       cy="37.850994"
+       inkscape:label="RISE_CV"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle46"
        cx="20.32"
-       cy="29.573668"
+       cy="75.5"
        inkscape:label="INVERT"
        r="1.5" />
     <circle
@@ -327,7 +327,7 @@
        style="fill:#00ff00;fill-opacity:1;stroke-width:0.199345"
        id="circle48"
        cx="20.32"
-       cy="19.823668"
+       cy="65.75"
        inkscape:label="INVERT"
        r="1.5" />
     <circle
@@ -341,85 +341,71 @@
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle53"
        cx="8.25"
-       cy="49.999668"
+       cy="70.672867"
        inkscape:label="FALL_SPEED_CV"
        r="1.5" />
     <circle
        style="fill:#00ff00;fill-opacity:1;stroke-width:0.199345"
        id="circle55"
        cx="8.25"
-       cy="59.749668"
+       cy="80.422874"
        inkscape:label="FALL_SPEED_CV"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle50"
        cx="8.25"
-       cy="40.249668"
+       cy="60.922871"
        inkscape:label="FALL_SPEED"
        r="1.5" />
     <circle
        style="fill:#00ff00;fill-opacity:1;stroke-width:0.199345"
        id="circle56"
        cx="32.389999"
-       cy="59.75"
+       cy="80.423203"
        inkscape:label="RISE_SPEED_CV"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle54"
        cx="32.389999"
-       cy="50"
+       cy="70.673203"
        inkscape:label="RISE_SPEED_CV"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle51"
        cx="32.389999"
-       cy="40.25"
+       cy="60.923203"
        inkscape:label="RISE_SPEED"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle52"
        cx="20.32"
-       cy="40.75"
+       cy="53.137444"
        inkscape:label="HIT_MODE"
        r="1.5" />
     <circle
        style="fill:#00ff00;fill-opacity:1;stroke-width:0.199345"
        id="circle57"
        cx="20.32"
-       cy="55.499668"
+       cy="21.324001"
        inkscape:label="MAIN"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
        id="circle58"
        cx="20.32"
-       cy="65.249664"
+       cy="31.073997"
        inkscape:label="IO_RANGE"
        r="1.5" />
     <circle
        style="fill:#0000ff;fill-opacity:1;stroke-width:0.199345"
        id="circle59"
        cx="20.32"
-       cy="74.999664"
+       cy="40.823997"
        inkscape:label="MAIN"
-       r="1.5" />
-    <circle
-       style="fill:#0000ff;fill-opacity:1;stroke-width:0.199345"
-       id="circle60"
-       cx="8.25"
-       cy="75.249664"
-       inkscape:label="FALLING"
-       r="1.5" />
-    <circle
-       style="fill:#0000ff;fill-opacity:1;stroke-width:0.199345"
-       id="circle61"
-       cx="32.389999"
-       cy="75.25"
-       inkscape:label="RISING"
        r="1.5" />
     <circle
        style="fill:#0000ff;fill-opacity:1;stroke-width:0.199345"
@@ -434,20 +420,6 @@
        cx="8.25"
        cy="94.749664"
        inkscape:label="FALLEN"
-       r="1.5" />
-    <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
-       id="circle64"
-       cx="8.25"
-       cy="84.999664"
-       inkscape:label="FALLING_SWITCH"
-       r="1.5" />
-    <circle
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
-       id="circle65"
-       cx="32.389999"
-       cy="85"
-       inkscape:label="RISING_SWITCH"
        r="1.5" />
     <circle
        style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
@@ -483,6 +455,34 @@
        cx="32.389999"
        cy="110.24999"
        inkscape:label="RISE_LIN_EXP"
+       r="1.5" />
+    <circle
+       style="fill:#00ff00;fill-opacity:1;stroke-width:0.199345"
+       id="circle81"
+       cx="8.25"
+       cy="47.776661"
+       inkscape:label="HIT_CV"
+       r="1.5" />
+    <circle
+       style="fill:#00ff00;fill-opacity:1;stroke-width:0.199345"
+       id="circle82"
+       cx="32.389999"
+       cy="47.776997"
+       inkscape:label="RISE_CV"
+       r="1.5" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
+       id="circle83"
+       cx="32.389999"
+       cy="28.101336"
+       inkscape:label="RISE"
+       r="1.5" />
+    <circle
+       style="fill:#ff0000;fill-opacity:1;stroke-width:0.199345"
+       id="circle84"
+       cx="8.25"
+       cy="28.101"
+       inkscape:label="FALL"
        r="1.5" />
   </g>
 </svg>
