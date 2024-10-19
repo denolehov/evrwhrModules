@@ -67,7 +67,7 @@ struct BaselineTracker {
 		current = crossfade(start, target, p);
 
 		if (isCloseEnough(current, target)) current = target;
-		if (isCloseEnough(target, baseline)) target = baseline;
+		if (trackingMode == BASELINE && isCloseEnough(target, baseline)) target = baseline;
 
 		const bool hasRisen = state == RISING && current == baseline;
 		const bool hasFallen = state == FALLING && current == baseline;
@@ -80,25 +80,27 @@ struct BaselineTracker {
 	}
 
 	void hit(const float strength) {
-		// If we're already falling, we want to hit harder
-		const float startingPoint = state == FALLING ? target : current;
-		target = clamp(startingPoint - strength, 0.f, 1.f);
-		progress = 0.f;
-		start = current;
-		trackingMode = TARGET;
+		if (trackingMode == TARGET) {
+			target = clamp(target - strength, 0.f, 1.f);
+			return;
+		}
 
-		DEBUG("HIT: %f", target);
+		start = current;
+		target = clamp(current - strength, 0.f, 1.f);
+		progress = 0.f;
+		trackingMode = TARGET;
 	}
 
 	void recover(const float strength) {
-		// If we're already rising, we want to recover faster
-		const float startingPoint = state == RISING ? target : current;
-		target = clamp(startingPoint + strength, 0.f, 1.f);
-		progress = 0.f;
-		start = current;
-		trackingMode = TARGET;
+		if (trackingMode == TARGET) {
+			target = clamp(target + strength, 0.f, 1.f);
+			return;
+		}
 
-		DEBUG("RECOVER: %f", target);
+		start = current;
+		target = clamp(current + strength, 0.f, 1.f);
+		progress = 0.f;
+		trackingMode = TARGET;
 	}
 
 	void setRiseSpeed(const float value) {
