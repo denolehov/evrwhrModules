@@ -1,5 +1,9 @@
 #include "plugin.hpp"
 
+bool isCloseEnough(const float a, const float b) {
+	return fabs(a - b) < 1e-3;
+}
+
 struct BaselineTracker {
 	enum State { IDLE, FALLING, RISING } state = IDLE;
 
@@ -12,80 +16,27 @@ struct BaselineTracker {
 
 	float riseLinExpRatio = 0.f, fallLinExpRatio = 0.f;
 
+	enum TrackingMode { BASELINE, TARGET } trackingMode = TARGET;
+
 	void updateState() {
-		// B = T = C
-		if (baseline == target && target == current) {
-			state = IDLE;
-		}
+		if (isCloseEnough(current, target)) {
+			if (isCloseEnough(target, baseline)) {
+				state = IDLE;
+				return;
+			}
 
-		// B = T > C
-		if (baseline == target && target > current) {
-			state = RISING;
-		}
+			if (trackingMode == TARGET) {
+				start = current;
+				progress = 0.f;
+				target = baseline;
+				trackingMode = BASELINE;
 
-		// B = T < C
-		if (baseline == target && target < current) {
-			state = FALLING;
-		}
-
-		// B = C > T
-		if (baseline == current && current > target) {
-			state = FALLING;
-		}
-
-		// B = C < T
-		if (baseline == current && current < target) {
-			state = RISING;
-		}
-
-		// T = C > B
-		if (target == current && current > baseline) {
-			target = baseline;
-			start = current;
-			progress = 0.f;
-			state = FALLING;
-		}
-
-		// T = C < B
-		if (target == current && current < baseline) {
-			target = baseline;
-			start = current;
-			progress = 0.f;
-			state = RISING;
-		}
-
-		// B > T > C
-		if (baseline > target && target > current) {
-			state = RISING;
-		}
-
-		// B > C > T
-		if (baseline > current && current > target) {
-			state = FALLING;
-		}
-
-		// T > B > C
-		if (target > baseline && baseline > current) {
-			target = baseline;
-			progress = 0.f;
-			state = RISING;
-		}
-
-		// T > C > B
-		if (target > current && current > baseline) {
-			state = RISING;
-		}
-
-		// C > B > T
-		if (current > baseline && baseline > target) {
-			target = baseline;
-			progress = 0.f;
-			state = FALLING;
-		}
-
-		// C > T > B
-		if (current > target && target > baseline) {
-			state = FALLING;
+				state = current < baseline ? RISING : FALLING;
+			} else if (trackingMode == BASELINE) {
+				state = IDLE;
+			}
+		} else {
+			state = current < target ? RISING : FALLING;
 		}
 	}
 
@@ -115,16 +66,11 @@ struct BaselineTracker {
 
 		current = crossfade(start, target, p);
 
-		if (fabs(target - baseline) < 0.0001f) {
-			target = baseline;
-		}
+		if (isCloseEnough(current, target)) current = target;
+		if (isCloseEnough(target, baseline)) target = baseline;
 
-		if (fabs(current - target) < 0.0001f) {
-			current = target;
-		}
-
-		const bool hasRisen = current == baseline;
-		const bool hasFallen = current == getInvertedBaseline();
+		const bool hasRisen = state == RISING && current == baseline;
+		const bool hasFallen = state == FALLING && current == baseline;
 
 		return { hasRisen, hasFallen, current };
 	}
@@ -134,15 +80,25 @@ struct BaselineTracker {
 	}
 
 	void hit(const float strength) {
-		target = clamp(current - strength, 0.f, 1.f);
-		progress = state == FALLING ? progress : 0.f;
+		// If we're already falling, we want to hit harder
+		const float startingPoint = state == FALLING ? target : current;
+		target = clamp(startingPoint - strength, 0.f, 1.f);
+		progress = 0.f;
 		start = current;
+		trackingMode = TARGET;
+
+		DEBUG("HIT: %f", target);
 	}
 
 	void recover(const float strength) {
-		target = clamp(current + strength, 0.f, 1.f);
-		progress = state == RISING ? progress : 0.f;
+		// If we're already rising, we want to recover faster
+		const float startingPoint = state == RISING ? target : current;
+		target = clamp(startingPoint + strength, 0.f, 1.f);
+		progress = 0.f;
 		start = current;
+		trackingMode = TARGET;
+
+		DEBUG("RECOVER: %f", target);
 	}
 
 	void setRiseSpeed(const float value) {
@@ -182,6 +138,10 @@ struct BaselineTracker {
 		}
 
 		return (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+	}
+
+	void printDebug() const {
+		DEBUG("Baseline: %f, Current: %f, Target: %f, Start: %f, Progress: %f, State: %d, Tracking Mode: %d", baseline, current, target, start, progress, state, trackingMode);
 	}
 };
 
@@ -274,6 +234,8 @@ struct Phoenix final : Module {
 	const float MIN_SPEED = 1e-3f, MAX_SPEED = 60.f, DEFAULT_SPEED = 1.f;
 	const float MIN_STRENGTH = 1e-3f, MAX_STRENGTH = 1.f, DEFAULT_STRENGTH = 1.f;
 
+	dsp::ClockDivider debugDiv;
+
 	Phoenix() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 
@@ -311,6 +273,8 @@ struct Phoenix final : Module {
 		configOutput(AUX_OUTPUT, "AUX");
 		configOutput(FALLEN_OUTPUT, "Fallen");
 		configOutput(RISEN_OUTPUT, "Risen");
+
+		debugDiv.setDivision(2048);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -391,6 +355,8 @@ struct Phoenix final : Module {
 		setLight(AUX_RANGE_PARAM_LIGHT, 1.f, rangeColors[auxRangeMode], args.sampleTime);
 
 		setLight(ATT_MODE_PARAM_LIGHT, 1.f, attColors[attMode], args.sampleTime);
+
+		if (debugDiv.process()) baseline.printDebug();
 	}
 
 	float attenuvert(const float param, const InputId cvInput, const ParamId cvParam, const float paramMin, const float paramMax) {
