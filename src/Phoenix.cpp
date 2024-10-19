@@ -10,7 +10,7 @@ struct BaselineTracker {
 	float MIN_SPEED = 0.0f;
 	float fallSpeed = MIN_SPEED, riseSpeed = MIN_SPEED;
 
-	void processState() {
+	void updateState() {
 		// B = T = C
 		if (baseline == target && target == current) {
 			state = IDLE;
@@ -87,11 +87,19 @@ struct BaselineTracker {
 		}
 	}
 
-	float process(const float delta) {
-		processState();
+	struct Result {
+		bool hasRisen = false, hasFallen = false;
+		float current = 0.f;
+
+		Result() = default;
+		Result(bool hasRisen, bool hasFallen, float current) : hasRisen(hasRisen), hasFallen(hasFallen), current(current) {}
+	};
+
+	Result process(const float delta) {
+		updateState();
 
 		if (state == IDLE) {
-			return current;
+			return {false, false, current};
 		}
 
 		progress += delta;
@@ -103,12 +111,18 @@ struct BaselineTracker {
 
 		current = crossfade(start, target, p);
 
-		// if current is "close enough" to target, just snap it to target
+		if (fabs(target - baseline) < 0.0001f) {
+			target = baseline;
+		}
+
 		if (fabs(current - target) < 0.0001f) {
 			current = target;
 		}
 
-		return current;
+		const bool hasRisen = current == baseline;
+		const bool hasFallen = current == getInvertedBaseline();
+
+		return { hasRisen, hasFallen, current };
 	}
 
 	float getCurrent() const {
@@ -136,7 +150,7 @@ struct BaselineTracker {
 	}
 
 	void invert() {
-		baseline = 1.f - baseline;
+		baseline = getInvertedBaseline();
 		target = 1.f - target;
 		start = current;
 		progress = 0.f;
@@ -144,6 +158,10 @@ struct BaselineTracker {
 
 	bool isInverted() const {
 		return baseline < 0.5f;
+	}
+
+	float getInvertedBaseline() const {
+		return 1.f - baseline;
 	}
 };
 
@@ -224,6 +242,9 @@ struct Phoenix final : Module {
 	dsp::SchmittTrigger hitTrigger, riseTrigger;
 	dsp::SchmittTrigger invertTrigger;
 
+	// Output triggers
+	dsp::PulseGenerator fallenTrigger, risenTrigger;
+
 	// Buttons
 	dsp::BooleanTrigger invertTriggerButton;
 	dsp::BooleanTrigger ioRangeButton, auxRangeButton;
@@ -250,12 +271,12 @@ struct Phoenix final : Module {
 		configParam(FALL_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Fall speed", " s", 2);
 		configParam(FALL_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Fall speed CV");
 		configInput(FALL_SPEED_CV_INPUT, "Fall speed CV");
-		configParam(FALL_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(FALL_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "Linear / Exponential fall");
 
 		configParam(RISE_SPEED_PARAM, std::log2(MIN_SPEED), std::log2(MAX_SPEED), std::log2(DEFAULT_SPEED), "Rise speed", " s", 2);
 		configParam(RISE_SPEED_CV_PARAM, -1.f, 1.f, 0.f, "Rise speed CV");
 		configInput(RISE_SPEED_CV_INPUT, "Rise speed CV");
-		configParam(RISE_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(RISE_LIN_EXP_PARAM, 0.f, 1.f, 0.f, "Linear / Exponential rise");
 
 		configButton(INVERT_PARAM, "Invert");
 		configInput(INVERT_INPUT, "Invert");
@@ -314,7 +335,7 @@ struct Phoenix final : Module {
 			attMode = static_cast<AttenuationMode>((attMode + 1) % NUM_ATT_MODES);
 		}
 
-		baseline.process(args.sampleTime);
+		const BaselineTracker::Result result = baseline.process(args.sampleTime);
 
 		const float input = clamp(getInput(MAIN_INPUT).getVoltage(), ioRange.min, ioRange.max);
 
@@ -332,6 +353,12 @@ struct Phoenix final : Module {
 
 		getOutput(MAIN_OUTPUT).setVoltage(clamp(out, ioRange.min, ioRange.max));
 		getOutput(AUX_OUTPUT).setVoltage(rescale(baseline.getCurrent(), 0.f, 1.f, auxRange.min, auxRange.max));
+
+		if (result.hasFallen) fallenTrigger.trigger();
+		getOutput(FALLEN_OUTPUT).setVoltage(fallenTrigger.process(args.sampleTime) ? 10.f : 0.f);
+
+		if (result.hasRisen) risenTrigger.trigger();  // HE HAS RISEN
+		getOutput(RISEN_OUTPUT).setVoltage(risenTrigger.process(args.sampleTime) ? 10.f : 0.f);
 
 		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
 		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
