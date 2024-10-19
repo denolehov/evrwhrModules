@@ -69,8 +69,13 @@ struct BaselineTracker {
 		if (isCloseEnough(current, target)) current = target;
 		if (trackingMode == BASELINE && isCloseEnough(target, baseline)) target = baseline;
 
-		const bool hasRisen = state == RISING && current == baseline;
-		const bool hasFallen = state == FALLING && current == baseline;
+		bool hasRisen = current == baseline;
+		bool hasFallen = current == getInvertedBaseline();
+
+		if (isInverted()) {
+			hasRisen = !hasRisen;
+			hasFallen = !hasFallen;
+		}
 
 		return { hasRisen, hasFallen, current };
 	}
