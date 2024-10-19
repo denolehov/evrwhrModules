@@ -10,6 +10,8 @@ struct BaselineTracker {
 	float MIN_SPEED = 0.0f;
 	float fallSpeed = MIN_SPEED, riseSpeed = MIN_SPEED;
 
+	float riseLinExpRatio = 0.f, fallLinExpRatio = 0.f;
+
 	void updateState() {
 		// B = T = C
 		if (baseline == target && target == current) {
@@ -109,6 +111,8 @@ struct BaselineTracker {
 			p = clamp(progress / speed, 0.f, 1.f);
 		}
 
+		p = crossfade(p, easeInAndOut(p), state == RISING ? riseLinExpRatio : fallLinExpRatio);
+
 		current = crossfade(start, target, p);
 
 		if (fabs(target - baseline) < 0.0001f) {
@@ -162,6 +166,22 @@ struct BaselineTracker {
 
 	float getInvertedBaseline() const {
 		return 1.f - baseline;
+	}
+
+	void setRiseLinExpRatio(const float value) {
+		riseLinExpRatio = value;
+	}
+
+	void setFallLinExpRatio(const float value) {
+		fallLinExpRatio = value;
+	}
+
+	static float easeInAndOut(const float t) {
+		if (t < 0.5f) {
+			return 4 * t * t * t;
+		}
+
+		return (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 	}
 };
 
@@ -299,6 +319,9 @@ struct Phoenix final : Module {
 
 		const float riseSpeed = std::exp2(getParam(RISE_SPEED_PARAM).getValue());
 		baseline.setRiseSpeed(attenuvert(riseSpeed, RISE_SPEED_CV_INPUT, RISE_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
+
+		baseline.setFallLinExpRatio(getParam(FALL_LIN_EXP_PARAM).getValue());
+		baseline.setRiseLinExpRatio(getParam(RISE_LIN_EXP_PARAM).getValue());
 
 		const bool invertTriggered = invertTriggerButton.process(getParam(INVERT_PARAM).getValue()) ||
 			invertTrigger.process(getInput(INVERT_INPUT).getVoltage(), 0.1f, 1.f);
