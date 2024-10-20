@@ -5,150 +5,21 @@ bool isCloseEnough(const float a, const float b) {
 }
 
 struct BaselineTracker {
-	enum State { IDLE, FALLING, RISING } state = IDLE;
+	float health = 1.f, target = 1.f;
 
-	float baseline = 1.f;
-	float start = 1.f, current = 1.f, target = 1.f;
-	float progress = 0.f;
-
-	float MIN_SPEED = 0.0f;
-	float fallSpeed = MIN_SPEED, riseSpeed = MIN_SPEED;
-
-	float riseLinExpRatio = 0.f, fallLinExpRatio = 0.f;
-
-	enum TrackingMode { BASELINE, TARGET } trackingMode = TARGET;
-
-	void updateState() {
-		if (isCloseEnough(current, target)) {
-			if (isCloseEnough(target, baseline)) {
-				state = IDLE;
-				return;
-			}
-
-			if (trackingMode == TARGET) {
-				start = current;
-				progress = 0.f;
-				target = baseline;
-				trackingMode = BASELINE;
-
-				state = current < baseline ? RISING : FALLING;
-			} else if (trackingMode == BASELINE) {
-				state = IDLE;
-			}
-		} else {
-			state = current < target ? RISING : FALLING;
-		}
+	void hit(const float amount) {
+		target -= amount;
 	}
 
-	struct Result {
-		bool hasRisen = false, hasFallen = false;
-		float current = 0.f;
-
-		Result() = default;
-		Result(bool hasRisen, bool hasFallen, float current) : hasRisen(hasRisen), hasFallen(hasFallen), current(current) {}
-	};
-
-	Result process(const float delta) {
-		updateState();
-
-		if (state == IDLE) {
-			return {false, false, current};
-		}
-
-		progress += delta;
-		const float speed = state == RISING ? riseSpeed : fallSpeed;
-		float p = 1.f;
-		if (speed > 0.f) {
-			p = clamp(progress / speed, 0.f, 1.f);
-		}
-
-		p = crossfade(p, easeInAndOut(p), state == RISING ? riseLinExpRatio : fallLinExpRatio);
-
-		current = crossfade(start, target, p);
-
-		if (isCloseEnough(current, target)) current = target;
-		if (trackingMode == BASELINE && isCloseEnough(target, baseline)) target = baseline;
-
-		bool hasRisen = current == baseline;
-		bool hasFallen = current == getInvertedBaseline();
-
-		if (isInverted()) {
-			hasRisen = !hasRisen;
-			hasFallen = !hasFallen;
-		}
-
-		return { hasRisen, hasFallen, current };
+	void recover(const float amount) {
+		target += amount;
 	}
 
-	float getCurrent() const {
-		return current;
-	}
+	float process() {
+		health = target;
+		health = clamp(health, 0.f, 1.f);
 
-	void hit(const float strength) {
-		if (trackingMode == TARGET) {
-			target = clamp(target - strength, 0.f, 1.f);
-			return;
-		}
-
-		start = current;
-		target = clamp(current - strength, 0.f, 1.f);
-		progress = 0.f;
-		trackingMode = TARGET;
-	}
-
-	void recover(const float strength) {
-		if (trackingMode == TARGET) {
-			target = clamp(target + strength, 0.f, 1.f);
-			return;
-		}
-
-		start = current;
-		target = clamp(current + strength, 0.f, 1.f);
-		progress = 0.f;
-		trackingMode = TARGET;
-	}
-
-	void setRiseSpeed(const float value) {
-		riseSpeed = std::max(value, MIN_SPEED);
-	}
-
-	void setFallSpeed(const float value) {
-		fallSpeed = std::max(value, MIN_SPEED);
-	}
-
-	void invert() {
-		baseline = getInvertedBaseline();
-		target = 1.f - target;
-		start = current;
-		progress = 0.f;
-	}
-
-	bool isInverted() const {
-		return baseline < 0.5f;
-	}
-
-	float getInvertedBaseline() const {
-		return 1.f - baseline;
-	}
-
-	void setRiseLinExpRatio(const float value) {
-		riseLinExpRatio = value;
-	}
-
-	void setFallLinExpRatio(const float value) {
-		fallLinExpRatio = value;
-	}
-
-	static float easeInAndOut(const float t) {
-		if (t < 0.5f) {
-			return 4 * t * t * t;
-		}
-
-		return (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-	}
-
-	void printDebug() const {
-		DEBUG("Baseline: %f, Current: %f, Target: %f, Start: %f, Progress: %f, State: %d, Tracking Mode: %d", baseline, current, target, start, progress, state, trackingMode);
+		return health;
 	}
 };
 
@@ -285,20 +156,20 @@ struct Phoenix final : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		const float fallSpeed = std::exp2(getParam(FALL_SPEED_PARAM).getValue());
-		baseline.setFallSpeed(attenuvert(fallSpeed, FALL_SPEED_CV_INPUT, FALL_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
+		// const float fallSpeed = std::exp2(getParam(FALL_SPEED_PARAM).getValue());
+		// baseline.setFallSpeed(attenuvert(fallSpeed, FALL_SPEED_CV_INPUT, FALL_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
 
-		const float riseSpeed = std::exp2(getParam(RISE_SPEED_PARAM).getValue());
-		baseline.setRiseSpeed(attenuvert(riseSpeed, RISE_SPEED_CV_INPUT, RISE_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
+		// const float riseSpeed = std::exp2(getParam(RISE_SPEED_PARAM).getValue());
+		// baseline.setRiseSpeed(attenuvert(riseSpeed, RISE_SPEED_CV_INPUT, RISE_SPEED_CV_PARAM, MIN_SPEED, MAX_SPEED));
 
-		baseline.setFallLinExpRatio(getParam(FALL_LIN_EXP_PARAM).getValue());
-		baseline.setRiseLinExpRatio(getParam(RISE_LIN_EXP_PARAM).getValue());
+		// baseline.setFallLinExpRatio(getParam(FALL_LIN_EXP_PARAM).getValue());
+		// baseline.setRiseLinExpRatio(getParam(RISE_LIN_EXP_PARAM).getValue());
 
-		const bool invertTriggered = invertTriggerButton.process(getParam(INVERT_PARAM).getValue()) ||
-			invertTrigger.process(getInput(INVERT_INPUT).getVoltage(), 0.1f, 1.f);
-		if (invertTriggered) {
-			baseline.invert();
-		}
+		// const bool invertTriggered = invertTriggerButton.process(getParam(INVERT_PARAM).getValue()) ||
+			// invertTrigger.process(getInput(INVERT_INPUT).getVoltage(), 0.1f, 1.f);
+		// if (invertTriggered) {
+			// baseline.invert();
+		// }
 
 		const bool hitTriggered = hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f);
 		if (hitTriggered) {
@@ -329,41 +200,42 @@ struct Phoenix final : Module {
 			attMode = static_cast<AttenuationMode>((attMode + 1) % NUM_ATT_MODES);
 		}
 
-		const BaselineTracker::Result result = baseline.process(args.sampleTime);
+		// const BaselineTracker::Result result = baseline.process(args.sampleTime);
+		const float b = baseline.process();
 
 		const float input = clamp(getInput(MAIN_INPUT).getVoltage(), ioRange.min, ioRange.max);
 
 		float out = input;
 		switch (attMode) {
 			case VCA:
-				out *= baseline.getCurrent();
+				out *= b;
 				break;
 			case Nudge:
 			default:
-				const float new_max = rescale(baseline.getCurrent(), 0.f, 1.f, ioRange.min, ioRange.max);
+				const float new_max = rescale(b, 0.f, 1.f, ioRange.min, ioRange.max);
 				out = rescale(input, ioRange.min, ioRange.max, ioRange.min, new_max);
 				break;
 		}
 
 		getOutput(MAIN_OUTPUT).setVoltage(clamp(out, ioRange.min, ioRange.max));
-		getOutput(AUX_OUTPUT).setVoltage(rescale(baseline.getCurrent(), 0.f, 1.f, auxRange.min, auxRange.max));
+		getOutput(AUX_OUTPUT).setVoltage(rescale(b, 0.f, 1.f, auxRange.min, auxRange.max));
 
-		if (result.hasFallen) fallenTrigger.trigger();
-		getOutput(FALLEN_OUTPUT).setVoltage(fallenTrigger.process(args.sampleTime) ? 10.f : 0.f);
+		// if (result.hasFallen) fallenTrigger.trigger();
+		// getOutput(FALLEN_OUTPUT).setVoltage(fallenTrigger.process(args.sampleTime) ? 10.f : 0.f);
 
-		if (result.hasRisen) risenTrigger.trigger();  // HE HAS RISEN
-		getOutput(RISEN_OUTPUT).setVoltage(risenTrigger.process(args.sampleTime) ? 10.f : 0.f);
+		// if (result.hasRisen) risenTrigger.trigger();  // HE HAS RISEN
+		// getOutput(RISEN_OUTPUT).setVoltage(risenTrigger.process(args.sampleTime) ? 10.f : 0.f);
 
 		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
 		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
-		setLight(INVERT_PARAM_LIGHT, baseline.isInverted() ? 1.f : 0.f, WHITE, args.sampleTime);
+		// setLight(INVERT_PARAM_LIGHT, b ? 1.f : 0.f, WHITE, args.sampleTime);
 
 		setLight(IO_RANGE_PARAM_LIGHT, 1.f, rangeColors[ioRangeMode], args.sampleTime);
 		setLight(AUX_RANGE_PARAM_LIGHT, 1.f, rangeColors[auxRangeMode], args.sampleTime);
 
 		setLight(ATT_MODE_PARAM_LIGHT, 1.f, attColors[attMode], args.sampleTime);
 
-		if (debugDiv.process()) baseline.printDebug();
+		// if (debugDiv.process()) baseline.printDebug();
 	}
 
 	float attenuvert(const float param, const InputId cvInput, const ParamId cvParam, const float paramMin, const float paramMax) {
