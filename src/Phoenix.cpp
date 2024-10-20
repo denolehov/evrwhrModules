@@ -3,36 +3,36 @@
 struct BurstTracker {
 	dsp::Timer timer;
 
-	float burstiness = 0.f;          // Current burstiness level (0.0 to 1.0)
-	float decayRate = std::log(100.0f) / 1.f;           // Decay rate per second
-	float burstThreshold = .85f;      // Threshold in seconds for bursts
-	float lastTriggerTime = -1.f;    // Time of the last trigger (-1 indicates no triggers yet)
+	float burstiness = 0.f;
+	float decayDuration = -std::log(0.01f) / 16.f;
+	float sensitivity = .1f;  // 10ms seems like a good minimum burst time
+	float lastTriggerTime = -1.f;
 
-	// Process function called every audio sample
 	float process(const float delta, const bool trigger) {
-		// Update the current time
 		const float currentTime = timer.process(delta);
 
-		// Apply exponential decay to burstiness
-		burstiness *= std::exp(-decayRate * delta);
+		burstiness *= std::exp(-decayDuration * delta);
+		// burstiness = decayDuration * delta;
 
-		// Handle trigger events
 		if (trigger) {
 			if (lastTriggerTime >= 0.f) {
-				// Calculate time since the last trigger
 				const float deltaTime = currentTime - lastTriggerTime;
-
-				// Calculate burst increment based on how close triggers are
-				const float burstIncrement = clamp(1.f - deltaTime / burstThreshold, 0.f, 1.f);
-
-				// Increase burstiness
+				const float burstIncrement = clamp(1.f - deltaTime / sensitivity, 0.f, 1.f);
+				DEBUG("BURST INCREMENT: %f", burstIncrement);
 				burstiness = clamp(burstiness + burstIncrement, 0.f, 1.f);
 			}
-			// Update lastTriggerTime to the current time
 			lastTriggerTime = currentTime;
 		}
 
 		return burstiness;
+	}
+
+	void setSensitivity(const float value) {
+		this->sensitivity = std::max(value, 1e-2f);
+	}
+
+	void setDecayTime(const float seconds) {
+		decayDuration = -std::log(0.01f) / seconds;
 	}
 };
 
@@ -106,7 +106,6 @@ struct Phoenix final : Module {
 
 	enum AttenuationMode { VCA, Nudge, NUM_ATT_MODES } attMode = VCA;
 
-	BaselineTracker baseline;
 	BurstTracker hitAvgTracker;
 
 	// Input triggers
@@ -185,19 +184,19 @@ struct Phoenix final : Module {
 		// }
 
 		const bool hitTriggered = hitTrigger.process(getInput(HIT_INPUT).getVoltage(), 0.1f, 1.f);
-		if (hitTriggered) {
-			const float hitStrength = attenuvert(getParam(FALL_PARAM).getValue(), HIT_CV_INPUT, HIT_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
-			baseline.hit(hitStrength);
-		}
+		// if (hitTriggered) {
+		// 	const float hitStrength = attenuvert(getParam(FALL_PARAM).getValue(), HIT_CV_INPUT, HIT_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
+		// 	baseline.hit(hitStrength);
+		// }
 
 		const float hitAvg = hitAvgTracker.process(args.sampleTime, hitTriggered);
 		if (debugDiv.process()) DEBUG("HIT AVG: %f", hitAvg);
 
-		const bool riseTriggered = riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
-		if (riseTriggered) {
-			const float riseStrength = attenuvert(getParam(RISE_PARAM).getValue(), RISE_CV_INPUT, RISE_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
-			baseline.recover(riseStrength);
-		}
+		// const bool riseTriggered = riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
+		// if (riseTriggered) {
+		// 	const float riseStrength = attenuvert(getParam(RISE_PARAM).getValue(), RISE_CV_INPUT, RISE_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
+		// 	baseline.recover(riseStrength);
+		// }
 
 		const bool ioRangeChanged = ioRangeButton.process(getParam(IO_RANGE_PARAM).getValue());
 		if (ioRangeChanged) {
@@ -217,19 +216,19 @@ struct Phoenix final : Module {
 		}
 
 		// const BaselineTracker::Result result = baseline.process(args.sampleTime);
-		const float b = baseline.process();
+		// const float b = baseline.process();
 
 		const float input = clamp(getInput(MAIN_INPUT).getVoltage(), ioRange.min, ioRange.max);
 
 		float out = input;
 		switch (attMode) {
 			case VCA:
-				out *= b;
+				// out *= b;
 				break;
 			case Nudge:
 			default:
-				const float new_max = rescale(b, 0.f, 1.f, ioRange.min, ioRange.max);
-				out = rescale(input, ioRange.min, ioRange.max, ioRange.min, new_max);
+				// const float new_max = rescale(b, 0.f, 1.f, ioRange.min, ioRange.max);
+				// out = rescale(input, ioRange.min, ioRange.max, ioRange.min, new_max);
 				break;
 		}
 
@@ -243,7 +242,7 @@ struct Phoenix final : Module {
 		// getOutput(RISEN_OUTPUT).setVoltage(risenTrigger.process(args.sampleTime) ? 10.f : 0.f);
 
 		setLight(HIT_PARAM_LIGHT, hitTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
-		setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
+		// setLight(RISE_PARAM_LIGHT, riseTriggered ? 1.f : 0.f, WHITE, args.sampleTime);
 		// setLight(INVERT_PARAM_LIGHT, b ? 1.f : 0.f, WHITE, args.sampleTime);
 
 		setLight(IO_RANGE_PARAM_LIGHT, 1.f, rangeColors[ioRangeMode], args.sampleTime);
