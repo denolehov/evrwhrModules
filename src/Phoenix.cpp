@@ -1,28 +1,40 @@
 #include "plugin.hpp"
 
-bool isCloseEnough(const float a, const float b) {
-	return fabs(a - b) < 1e-3;
-}
+struct BurstTracker {
+	dsp::Timer timer;
 
-struct BaselineTracker {
-	float health = 1.f, target = 1.f;
+	float burstiness = 0.f;          // Current burstiness level (0.0 to 1.0)
+	float decayRate = std::log(100.0f) / 1.f;           // Decay rate per second
+	float burstThreshold = .85f;      // Threshold in seconds for bursts
+	float lastTriggerTime = -1.f;    // Time of the last trigger (-1 indicates no triggers yet)
 
-	void hit(const float amount) {
-		target -= amount;
-	}
+	// Process function called every audio sample
+	float process(const float delta, const bool trigger) {
+		// Update the current time
+		const float currentTime = timer.process(delta);
 
-	void recover(const float amount) {
-		target += amount;
-	}
+		// Apply exponential decay to burstiness
+		burstiness *= std::exp(-decayRate * delta);
 
-	float process() {
-		health = target;
-		health = clamp(health, 0.f, 1.f);
+		// Handle trigger events
+		if (trigger) {
+			if (lastTriggerTime >= 0.f) {
+				// Calculate time since the last trigger
+				const float deltaTime = currentTime - lastTriggerTime;
 
-		return health;
+				// Calculate burst increment based on how close triggers are
+				const float burstIncrement = clamp(1.f - deltaTime / burstThreshold, 0.f, 1.f);
+
+				// Increase burstiness
+				burstiness = clamp(burstiness + burstIncrement, 0.f, 1.f);
+			}
+			// Update lastTriggerTime to the current time
+			lastTriggerTime = currentTime;
+		}
+
+		return burstiness;
 	}
 };
-
 
 struct Phoenix final : Module {
 	enum ParamId {
@@ -95,6 +107,7 @@ struct Phoenix final : Module {
 	enum AttenuationMode { VCA, Nudge, NUM_ATT_MODES } attMode = VCA;
 
 	BaselineTracker baseline;
+	BurstTracker hitAvgTracker;
 
 	// Input triggers
 	dsp::SchmittTrigger hitTrigger, riseTrigger;
@@ -177,6 +190,9 @@ struct Phoenix final : Module {
 			baseline.hit(hitStrength);
 		}
 
+		const float hitAvg = hitAvgTracker.process(args.sampleTime, hitTriggered);
+		if (debugDiv.process()) DEBUG("HIT AVG: %f", hitAvg);
+
 		const bool riseTriggered = riseTrigger.process(getInput(RISE_INPUT).getVoltage(), 0.1f, 1.f);
 		if (riseTriggered) {
 			const float riseStrength = attenuvert(getParam(RISE_PARAM).getValue(), RISE_CV_INPUT, RISE_CV_PARAM, MIN_STRENGTH, MAX_STRENGTH);
@@ -218,7 +234,7 @@ struct Phoenix final : Module {
 		}
 
 		getOutput(MAIN_OUTPUT).setVoltage(clamp(out, ioRange.min, ioRange.max));
-		getOutput(AUX_OUTPUT).setVoltage(rescale(b, 0.f, 1.f, auxRange.min, auxRange.max));
+		getOutput(AUX_OUTPUT).setVoltage(rescale(hitAvg, 0.f, 1.f, auxRange.min, auxRange.max));
 
 		// if (result.hasFallen) fallenTrigger.trigger();
 		// getOutput(FALLEN_OUTPUT).setVoltage(fallenTrigger.process(args.sampleTime) ? 10.f : 0.f);
